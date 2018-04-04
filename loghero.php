@@ -18,15 +18,32 @@ if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
 
         public function create() {
             $logEvent = new LHLogEvent();
+            $this->setHostname($logEvent);
             $this->setLandingPagePath($logEvent);
             $this->setUserAgent($logEvent);
             $this->setIpAddress($logEvent);
             $this->setTimestamp($logEvent);
+            $this->setMethod($logEvent);
+            $this->setStatusCode($logEvent);
             return $logEvent;
+        }
+
+        private function setHostname($logEvent) {
+            $logEvent->setHostname($_SERVER['HTTP_HOST']);
         }
 
         private function setLandingPagePath($logEvent) {
             $logEvent->setUserAgent($_SERVER['REQUEST_URI']);
+        }
+
+        private function setMethod($logEvent) {
+            $logEvent->setMethod(preg_replace('/[^\w]/', '', $_SERVER['REQUEST_METHOD']));
+        }
+
+        private function setStatusCode($logEvent) {
+            if ( function_exists( 'http_response_code' ) ) {
+                $logEvent->setStatusCode(http_response_code());
+            }
         }
 
         private function setUserAgent($logEvent) {
@@ -59,7 +76,6 @@ if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
             }
             $logEvent->setIpAddress($ipAddress);
         }
-
     }
 
     class LogHeroClient_Plugin {
@@ -86,7 +102,6 @@ if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
             $this->apiClient->submit($logEvent);
             $this->apiClient->flush();
         }
-
     }
 
     $LogHeroClientPlugin = LogHeroClient_Plugin::getInstance();
