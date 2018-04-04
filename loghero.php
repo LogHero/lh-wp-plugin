@@ -33,7 +33,7 @@ if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
         }
 
         private function setLandingPagePath($logEvent) {
-            $logEvent->setUserAgent($_SERVER['REQUEST_URI']);
+            $logEvent->setLandingPagePath($_SERVER['REQUEST_URI']);
         }
 
         private function setMethod($logEvent) {
