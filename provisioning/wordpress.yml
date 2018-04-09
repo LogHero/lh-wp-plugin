@@ -1,0 +1,14 @@
+---
+- hosts: all
+  become: yes
+  gather_facts: False
+  pre_tasks:
+    - name: Install Python for Ansible
+      raw: test -e /usr/bin/python || (apt-get -y update && apt-get install -y python-minimal)
+      changed_when: False
+    - setup: # aka gather_facts
+  tasks:
+    - name: Update repositories cache and install php-cli
+      apt:
+        name: php-cli
+        update_cache: yes
