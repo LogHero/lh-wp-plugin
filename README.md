@@ -13,3 +13,10 @@ To access the Wordpress site, add the following line to your hosts file:
 192.168.1.10    local.loghero.io
 ```
 Now you can access the Wordpress site: http://local.loghero.io
+
+## Plugin Tests
+
+To run the plugin tests, execute:
+```
+vagrant ssh -c 'cd /var/www/html/wp-content/plugins/loghero && phpunit'
+```
