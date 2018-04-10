@@ -1,0 +1,3 @@
+[submodule "loghero/sdk"]
+	path = loghero/sdk
+	url = git@github.com:atript/lh-php-sdk.git
