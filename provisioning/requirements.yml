@@ -1,0 +1,4 @@
+# ansible-galaxy install -r requirements.yml
+- src: bennojoy.mysql
+- src: franklinkim.apache2
+- src: tersmitten.wordpress
