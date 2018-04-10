@@ -9,6 +9,7 @@
     wp_mysql_user: wordpress
     wp_mysql_password: wordpress
     wp_install_dir: /var/www/html
+    composer_path: /usr/local/bin/composer
     mysql_root_db_pass: loghero
     mysql_db:
       - name: wordpress
@@ -28,9 +29,7 @@
         admin_name: '{{ wp_user }}'
         admin_email: '{{ wp_email }}'
         admin_password: '{{ wp_password }}'
-        themes:
-          - name: twentytwelve
-            activate: true
+        themes: []
         plugins: []
         users: {}
         options: []
@@ -47,6 +46,9 @@
       with_items:
         - php
         - php-cli
+        - php-mbstring
+        - php-xml
+        - php-curl
         - libapache2-mod-php
         - php-mysql
         - phpunit
@@ -55,6 +57,7 @@
     - bennojoy.mysql
     - franklinkim.apache2
     - tersmitten.wordpress
+    - geerlingguy.composer
   tasks:
     - name: Remove default Apache index.html from Wordpress install directory
       file:

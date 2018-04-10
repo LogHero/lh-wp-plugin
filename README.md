@@ -14,9 +14,18 @@ To access the Wordpress site, add the following line to your hosts file:
 ```
 Now you can access the Wordpress site: http://local.loghero.io
 
-## Plugin Tests
+## Testing
 
 To run the plugin tests, execute:
 ```
 vagrant ssh -c 'cd /var/www/html/wp-content/plugins/loghero && phpunit'
+```
+
+To run the SDK tests, install phpunit with composer:
+```
+vagrant ssh -c 'cd /var/www/html/wp-content/plugins/loghero/sdk && composer install'
+```
+Then execute phpunit:
+```
+vagrant ssh -c 'cd /var/www/html/wp-content/plugins/loghero/sdk && php vendor/phpunit/phpunit/phpunit test'
 ```
