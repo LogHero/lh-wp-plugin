@@ -55,11 +55,11 @@ if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
 
         private function setTimestamp($logEvent) {
             $unixTimestamp = null;
-            if (!empty( $_SERVER['REQUEST_TIME_FLOAT'])) { // PHP >= 5.4
+            if (!empty($_SERVER['REQUEST_TIME_FLOAT'])) { // PHP >= 5.4
                 $unixTimestamp = $_SERVER['REQUEST_TIME_FLOAT'];
             }
             else {
-                $unixTimestamp = microtime( true );
+                $unixTimestamp = microtime(true);
             }
             $timeStamp = new DateTime();
             $timeStamp->setTimestamp($unixTimestamp);
@@ -79,20 +79,21 @@ if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
     }
 
     class LogHeroClient_Plugin {
-        private static $Instance = false;
-        private $apiClient;
-        private $logEventFactory;
+        protected static $Instance = false;
+        protected $apiKey;
+        protected $apiClient;
+        protected $logEventFactory;
 
         public function __construct() {
-            $apiKey = get_option('api_key');
+            $this->apiKey = get_option('api_key');
             $this->logEventFactory = new LogHeroLogEventFactory();
-            $this->apiClient = new LHClient($apiKey, 3);
+            $this->apiClient = LHClient::create($this->apiKey);
             add_action('shutdown', array($this, 'sendLogEvent'));
         }
 
         public static function getInstance() {
             if (!self::$Instance) {
-                self::$Instance = new self;
+                self::$Instance = new self();
             }
             return self::$Instance;
         }
@@ -102,6 +103,7 @@ if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
             $this->apiClient->submit($logEvent);
             $this->apiClient->flush();
         }
+
     }
 
     $LogHeroClientPlugin = LogHeroClient_Plugin::getInstance();

@@ -1,0 +1,65 @@
+---
+- hosts: all
+  become: yes
+  gather_facts: False
+  vars:
+    wp_user: loghero
+    wp_email: mail@loghero.io
+    wp_password: loghero
+    wp_mysql_user: wordpress
+    wp_mysql_password: wordpress
+    wp_install_dir: /var/www/html
+    composer_path: /usr/local/bin/composer
+    mysql_root_db_pass: loghero
+    mysql_db:
+      - name: wordpress
+        replicate: no
+    mysql_users:
+      - name: '{{ wp_mysql_user }}'
+        pass: '{{ wp_mysql_user }}'
+    wordpress_installs:
+      - name: wordpress
+        dbname: wordpress
+        dbuser: '{{ wp_mysql_user }}'
+        dbpass: '{{ wp_mysql_user }}'
+        dbhost: localhost
+        path: '{{ wp_install_dir }}'
+        url: http://local.loghero.io
+        title: Log Hero
+        admin_name: '{{ wp_user }}'
+        admin_email: '{{ wp_email }}'
+        admin_password: '{{ wp_password }}'
+        themes: []
+        plugins: []
+        users: {}
+        options: []
+        queries: []
+  pre_tasks:
+    - name: Install Python for Ansible
+      raw: test -e /usr/bin/python || (apt-get -y update && apt-get install -y python-minimal)
+      changed_when: False
+    - setup: # aka gather_facts
+    - name: Update repositories cache and install PHP
+      apt:
+        name: '{{ item }}'
+        update_cache: yes
+      with_items:
+        - php
+        - php-cli
+        - php-mbstring
+        - php-xml
+        - php-curl
+        - libapache2-mod-php
+        - php-mysql
+        - phpunit
+        - subversion
+  roles:
+    - bennojoy.mysql
+    - franklinkim.apache2
+    - tersmitten.wordpress
+    - geerlingguy.composer
+  tasks:
+    - name: Remove default Apache index.html from Wordpress install directory
+      file:
+        state: absent
+        path: '{{ wp_install_dir }}/index.html'
