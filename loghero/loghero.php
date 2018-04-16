@@ -83,11 +83,12 @@ if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
         protected $apiKey;
         protected $apiClient;
         protected $logEventFactory;
+        protected $clientId = 'Wordpress Plugin loghero/wp@0.1.0';
 
         public function __construct() {
             $this->apiKey = get_option('api_key');
             $this->logEventFactory = new LogHeroLogEventFactory();
-            $this->apiClient = LHClient::create($this->apiKey);
+            $this->apiClient = LHClient::create($this->apiKey, $this->clientId);
             add_action('shutdown', array($this, 'sendLogEvent'));
         }
 
