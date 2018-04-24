@@ -6,8 +6,11 @@ Version: 0.0.1
 
 namespace LogHero\Wordpress;
 
+use LogHero\Client\FileLogBuffer;
+
 if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
     require_once(dirname(__FILE__) . '/sdk/src/LogHero.php');
+    require_once(dirname(__FILE__) . '/sdk/src/LogBuffer.php');
 
     # TODO Handle proxies HTTP_X_FORWARDED_FOR (see cerber)
     class LogHeroLogEventFactory {
@@ -19,7 +22,7 @@ if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
         );
 
         public function create() {
-            $logEvent = new \LHLogEvent();
+            $logEvent = new \LogHero\Client\LogEvent();
             $this
                 ->setHostname($logEvent)
                 ->setLandingPagePath($logEvent)
@@ -101,7 +104,11 @@ if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
         public function __construct() {
             $this->apiKey = get_option('api_key');
             $this->logEventFactory = new LogHeroLogEventFactory();
-            $this->apiClient = \LHClient::create($this->apiKey, $this->clientId);
+            $this->apiClient = \LogHero\Client\Client::create(
+                $this->apiKey,
+                $this->clientId,
+                new FileLogBuffer(__DIR__ . '/logs/buffer.loghero.io.txt')
+            );
             add_action('shutdown', array($this, 'sendLogEvent'));
         }
 
@@ -115,7 +122,6 @@ if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
         public function sendLogEvent() {
             $logEvent = $this->logEventFactory->create();
             $this->apiClient->submit($logEvent);
-            $this->apiClient->flush();
         }
 
     }
