@@ -29,3 +29,11 @@ Then execute phpunit:
 ```
 vagrant ssh -c 'cd /var/www/html/wp-content/plugins/loghero/sdk && php vendor/phpunit/phpunit/phpunit test'
 ```
+It might happen that you see the following error message when running the plugin tests:
+```
+Could not find /tmp/wordpress-tests-lib/includes/functions.php, have you run bin/install-wp-tests.sh ?
+```
+If so, run the following command:
+```
+vagrant ssh -c 'cd /var/www/html/wp-content/plugins/loghero && ./bin/install-wp-tests.sh wordpress_test root loghero'
+```
