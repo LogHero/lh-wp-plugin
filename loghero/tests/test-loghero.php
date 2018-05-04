@@ -1,5 +1,6 @@
 <?php
 namespace LogHero\Wordpress;
+require_once __DIR__ . '/mock-microtime.php';
 
 
 function microtime() {
