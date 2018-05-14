@@ -52,7 +52,8 @@ class LogHeroClientPluginTest extends \WP_UnitTestCase {
                 '2018-04-11T06:48:18+00:00',
                 2389,
                 'f528764d624db129b32c21fbca0cb8d6',
-                'Firefox'
+                'Firefox',
+                'https://www.loghero.io'
             ]])));
         $this->plugin->sendLogEvent();
 	}
@@ -72,7 +73,8 @@ class LogHeroClientPluginTest extends \WP_UnitTestCase {
                 '2018-04-11T06:48:20+00:00',
                 null,
                 'f528764d624db129b32c21fbca0cb8d6',
-                'Firefox'
+                'Firefox',
+                'https://www.loghero.io'
             ]])));
         $this->plugin->sendLogEvent();
     }
@@ -93,7 +95,8 @@ class LogHeroClientPluginTest extends \WP_UnitTestCase {
                     '2018-04-11T06:48:18+00:00',
                     2389,
                     'f528764d624db129b32c21fbca0cb8d6',
-                    'Firefox'
+                    'Firefox',
+                    'https://www.loghero.io'
                 ],
                 [
                     'd113ff3141723d50fec2933977c89ea6',
@@ -104,7 +107,8 @@ class LogHeroClientPluginTest extends \WP_UnitTestCase {
                     '2018-04-11T06:48:18+00:00',
                     2389,
                     'f528764d624db129b32c21fbca0cb8d6',
-                    'Firefox'
+                    'Firefox',
+                    'https://www.loghero.io'
                 ]
             ])));
         $this->setupServerGlobal('/page-url-1');
@@ -115,7 +119,18 @@ class LogHeroClientPluginTest extends \WP_UnitTestCase {
 
     private function buildExpectedPayload($rows) {
         return json_encode(array(
-            'columns' => ['cid', 'hostname', 'landingPage', 'method', 'statusCode', 'timestamp', 'pageLoadTime', 'ip', 'ua'],
+            'columns' => [
+                'cid',
+                'hostname',
+                'landingPage',
+                'method',
+                'statusCode',
+                'timestamp',
+                'pageLoadTime',
+                'ip',
+                'ua',
+                'referer'
+            ],
             'rows' => $rows
         ));
     }
@@ -126,6 +141,7 @@ class LogHeroClientPluginTest extends \WP_UnitTestCase {
         $_SERVER['HTTP_USER_AGENT'] = 'Firefox';
         $_SERVER['REQUEST_TIME_FLOAT'] = 1523429298.4109;
         $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+        $_SERVER['HTTP_REFERER'] = 'https://www.loghero.io';
         http_response_code(301);
     }
 }

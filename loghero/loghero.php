@@ -30,7 +30,8 @@ if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
                 ->setIpAddress($logEvent)
                 ->setTimestampAndPageLoadTime($logEvent)
                 ->setMethod($logEvent)
-                ->setStatusCode($logEvent);
+                ->setStatusCode($logEvent)
+                ->setReferer($logEvent);
             return $logEvent;
         }
 
@@ -61,6 +62,11 @@ if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
                 $ua = $_SERVER['HTTP_USER_AGENT'];
                 $logEvent->setUserAgent($ua);
             }
+            return $this;
+        }
+
+        private function setReferer($logEvent) {
+            $logEvent->setReferer($_SERVER['HTTP_REFERER']);
             return $this;
         }
 
