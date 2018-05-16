@@ -7,6 +7,7 @@ Version: 0.0.1
 namespace LogHero\Wordpress;
 
 use LogHero\Client\FileLogBuffer;
+use LogHero\Client\MemLogBuffer;
 
 if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
     require_once(dirname(__FILE__) . '/sdk/src/LogHero.php');
@@ -110,10 +111,14 @@ if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
         public function __construct() {
             $this->apiKey = get_option('api_key');
             $this->logEventFactory = new LogHeroLogEventFactory();
-            $this->apiClient = \LogHero\Client\Client::create(
-                $this->apiKey,
-                $this->clientId,
-                new FileLogBuffer(__DIR__ . '/logs/buffer.loghero.io.txt')
+            $this->apiClient = new \LogHero\Client\Client(
+                new \LogHero\Client\APIAccessCurl(
+                    $this->apiKey,
+                    $this->clientId,
+                    'https://development.loghero.io/logs/'
+                ),
+                new MemLogBuffer(2000),
+                1000
             );
             add_action('shutdown', array($this, 'sendLogEvent'));
         }
