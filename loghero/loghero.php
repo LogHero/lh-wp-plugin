@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: LogHero Client
-Version:     0.1.1
+Version:     0.1.2
 Description: The official PHP Wordpress plugin for loghero.io.
 Author:      Kay Wolter
 Author URI:  https://www.funktionswerk.de/
@@ -43,7 +43,7 @@ if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
         protected $apiKey;
         protected $apiClient;
         protected $logEventFactory;
-        protected $clientId = 'Wordpress Plugin loghero/wp@0.1.1';
+        protected $clientId = 'Wordpress Plugin loghero/wp@0.1.2';
 
         public function __construct() {
             $this->apiKey = get_option('api_key');
