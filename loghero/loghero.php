@@ -45,7 +45,7 @@ if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
 
     }
 
-    $LogHeroClientPlugin = LogHeroClient_Plugin::getInstance();
+    LogHeroClient_Plugin::getInstance();
 
     if (is_admin()) {
         require_once(dirname(__FILE__) . '/admin/loghero-admin.php');
