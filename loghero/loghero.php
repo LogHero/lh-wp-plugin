@@ -34,9 +34,11 @@ namespace LogHero\Wordpress;
 use LogHero\Client\FileLogBuffer;
 
 if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
+
     require_once(dirname(__FILE__) . '/sdk/src/LogHero.php');
     require_once(dirname(__FILE__) . '/sdk/src/LogBuffer.php');
     require_once(dirname(__FILE__) . '/sdk/src/LogEventFactory.php');
+    require_once(dirname(__FILE__) . '/sdk/src/APIAccess.php');
 
     class LogHeroClient_Plugin {
         protected static $Instance = false;
@@ -65,7 +67,38 @@ if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
 
         public function sendLogEvent() {
             $logEvent = $this->logEventFactory->create();
+            // TODO: Test this:
+            if ($logEvent->getUserAgent() == $this->clientId) {
+                return;
+            }
             $this->apiClient->submit($logEvent);
+            if ($this->apiClient->needsFlush()) {
+                $this->triggerFlush();
+            }
+        }
+
+        private function triggerFlush() {
+            $triggerEndpoint = get_home_url() . '/wp-content/plugins/loghero/flush.php';
+            $curlClient = new \LogHero\Client\CurlClient($triggerEndpoint);
+            $curlClient->setOpt(CURLOPT_HTTPHEADER, array(
+                'Authorization: '.$this->apiKey,
+                'User-Agent: '.$this->clientId
+            ));
+            $curlClient->setOpt(CURLOPT_CUSTOMREQUEST, 'GET');
+            $curlClient->exec();
+            $status = $curlClient->getInfo(CURLINFO_HTTP_CODE);
+            if ( $status >= 300 ) {
+                $errorMessage = $curlClient->error();
+                $curlClient->close();
+                throw new \LogHero\Client\APIAccessException(
+                    'Call to URL '.$triggerEndpoint.' failed with status '.$status.'; Message: '.$errorMessage
+                );
+            }
+            $curlClient->close();
+        }
+
+        public function flush() {
+            $this->apiClient->flush();
         }
 
     }
