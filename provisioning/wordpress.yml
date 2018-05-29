@@ -63,3 +63,7 @@
       file:
         state: absent
         path: '{{ wp_install_dir }}/index.html'
+    - name: Add local.loghero.io to /etc/hosts
+      lineinfile:
+        path: /etc/hosts
+        line: '127.0.0.1       local.loghero.io'
