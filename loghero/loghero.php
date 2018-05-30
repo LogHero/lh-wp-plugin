@@ -77,8 +77,12 @@ if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
             }
         }
 
+        # TODO Test this function
         private function triggerFlush() {
-            $triggerEndpoint = get_home_url() . '/wp-content/plugins/loghero/flush.php';
+            # TODO Backslashes on Windows?
+            $absolutePluginDirectory = plugin_dir_path( __FILE__ );
+            $relativePluginDirectory = str_replace(ABSPATH, '/', $absolutePluginDirectory);
+            $triggerEndpoint = get_home_url() . $relativePluginDirectory . 'flush.php';
             $curlClient = new \LogHero\Client\CurlClient($triggerEndpoint);
             $curlClient->setOpt(CURLOPT_HTTPHEADER, array(
                 'Authorization: '.$this->apiKey,
