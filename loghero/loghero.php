@@ -51,7 +51,13 @@ if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
             $this->logEventFactory = new \LogHero\Client\LogEventFactory();
             $logBuffer = new \LogHero\Client\FileLogBuffer(__DIR__ . '/logs/buffer.loghero.io.txt');
             $apiAccess = new \LogHero\Client\APIAccess($this->apiKey, $this->clientId);
-            $this->logTransport = new \LogHero\Client\LogTransport($logBuffer, $apiAccess);
+            $this->logTransport = new \LogHero\Client\AsyncLogTransport(
+                $logBuffer,
+                $apiAccess,
+                $this->clientId,
+                $this->apiKey,
+                $this->flushEndpoint()
+            );
             add_action('shutdown', array($this, 'submitLogEvent'));
         }
 
@@ -68,26 +74,6 @@ if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
                 return;
             }
             $this->logTransport->submit($logEvent);
-        }
-
-        # TODO Test this function
-        private function triggerFlush() {
-            $curlClient = new \LogHero\Client\CurlClient($this->flushEndpoint());
-            $curlClient->setOpt(CURLOPT_HTTPHEADER, array(
-                'Authorization: '.$this->apiKey,
-                'User-Agent: '.$this->clientId
-            ));
-            $curlClient->setOpt(CURLOPT_CUSTOMREQUEST, 'GET');
-            $curlClient->exec();
-            $status = $curlClient->getInfo(CURLINFO_HTTP_CODE);
-            if ( $status >= 300 ) {
-                $errorMessage = $curlClient->error();
-                $curlClient->close();
-                throw new \LogHero\Client\APIAccessException(
-                    'Call to URL '.$triggerEndpoint.' failed with status '.$status.'; Message: '.$errorMessage
-                );
-            }
-            $curlClient->close();
         }
 
         public function flush() {
