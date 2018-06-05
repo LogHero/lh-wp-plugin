@@ -4,17 +4,14 @@ require_once __DIR__ . '/mock-microtime.php';
 require_once __DIR__ . '/../sdk/src/buffer/MemLogBuffer.php';
 
 
-function microtime() {
-    return 1523429300.8000;
-}
-
-
 class LogHeroClient_PluginTestImpl extends LogHeroClient_Plugin {
 
-    public function __construct($apiAccessStub, $maxBufferSize=1) {
-        parent::__construct();
-        $logBuffer = new \LogHero\Client\MemLogBuffer($maxBufferSize);
-        $this->logTransport = new \LogHero\Client\LogTransport($logBuffer, $apiAccessStub);
+    public function setLogTransport(\LogHero\Client\LogTransportInterface $logTranport) {
+        $this->logTransport = $logTranport;
+    }
+
+    public function getFlushTriggerUrl() {
+        return $this->flushEndpoint();
     }
 
 }
@@ -29,6 +26,8 @@ class LogHeroClientPluginTest extends \WP_UnitTestCase {
         update_option('api_key', 'API_KEY');
         $this->apiAccessStub = $this->getMockBuilder(\LogHero\Client\APIAccessInterface::class)->getMock();
         $this->plugin = new LogHeroClient_PluginTestImpl($this->apiAccessStub);
+        $logBuffer = new \LogHero\Client\MemLogBuffer(1);
+        $this->plugin->setLogTransport(new \LogHero\Client\LogTransport($logBuffer, $this->apiAccessStub));
     }
 
     function tearDown() {
@@ -36,7 +35,7 @@ class LogHeroClientPluginTest extends \WP_UnitTestCase {
         remove_action('shutdown', array($this->plugin, 'sendLogEvent'));
     }
 
-	function testSendLogEvent() {
+	function testSubmitLogEvent() {
         $this->setupServerGlobal('/page-url');
         $this->apiAccessStub
             ->expects(static::once())
@@ -53,10 +52,10 @@ class LogHeroClientPluginTest extends \WP_UnitTestCase {
                 'Firefox',
                 'https://www.loghero.io'
             ]])));
-        $this->plugin->sendLogEvent();
+        $this->plugin->submitLogEvent();
 	}
 
-	function testSendLogEventWithoutPageLoadTimeIfNoRequestTime() {
+	function testSubmitLogEventWithoutPageLoadTimeIfNoRequestTime() {
         $this->setupServerGlobal('/page-url');
         $_SERVER['REQUEST_TIME_FLOAT'] = null;
         $this->apiAccessStub
@@ -74,12 +73,13 @@ class LogHeroClientPluginTest extends \WP_UnitTestCase {
                 'Firefox',
                 'https://www.loghero.io'
             ]])));
-        $this->plugin->sendLogEvent();
+        $this->plugin->submitLogEvent();
     }
 
     function testSendLogEventsInBatch() {
-        remove_action('shutdown', array($this->plugin, 'sendLogEvent'));
-        $this->plugin = new LogHeroClient_PluginTestImpl($this->apiAccessStub, 2);
+        remove_action('shutdown', array($this->plugin, 'submitLogEvent'));
+        $logBuffer = new \LogHero\Client\MemLogBuffer(2);
+        $this->plugin->setLogTransport(new \LogHero\Client\LogTransport($logBuffer, $this->apiAccessStub));
         $this->apiAccessStub
             ->expects(static::once())
             ->method('submitLogPackage')
@@ -110,9 +110,9 @@ class LogHeroClientPluginTest extends \WP_UnitTestCase {
                 ]
             ])));
         $this->setupServerGlobal('/page-url-1');
-        $this->plugin->sendLogEvent();
+        $this->plugin->submitLogEvent();
         $this->setupServerGlobal('/page-url-2');
-        $this->plugin->sendLogEvent();
+        $this->plugin->submitLogEvent();
     }
 
     function testIgnoreLogEventsSentByPluginItself() {
@@ -121,7 +121,55 @@ class LogHeroClientPluginTest extends \WP_UnitTestCase {
         $this->apiAccessStub
             ->expects(static::never())
             ->method('submitLogPackage');
-        $this->plugin->sendLogEvent();
+        $this->plugin->submitLogEvent();
+    }
+
+    function testCreateUrlForFlushEndpoint() {
+        static::assertEquals('http://example.org/var/www/html/wp-content/plugins/loghero/flush.php', $this->plugin->getFlushTriggerUrl());
+    }
+
+    function testAsyncLogTransportNoSendOnSubmit() {
+        $this->setupAsyncLogTransport();
+        $this->setupServerGlobal('/page-url');
+        $this->apiAccessStub
+            ->expects(static::never())
+            ->method('submitLogPackage');
+        $this->plugin->submitLogEvent();
+    }
+
+    function testAsyncLogTransportSendOnFlush() {
+        $this->setupAsyncLogTransport();
+        $this->setupServerGlobal('/page-url');
+        $this->plugin->submitLogEvent();
+        $this->apiAccessStub
+            ->expects(static::once())
+            ->method('submitLogPackage')
+            ->with($this->equalTo($this->buildExpectedPayload([[
+                'd113ff3141723d50fec2933977c89ea6',
+                'example.org',
+                '/page-url',
+                'POST',
+                301,
+                '2018-04-11T06:48:18+00:00',
+                2389,
+                'f528764d624db129b32c21fbca0cb8d6',
+                'Firefox',
+                'https://www.loghero.io'
+            ]])));
+        $this->plugin->flush();
+    }
+
+    private function setupAsyncLogTransport() {
+        $logBuffer = new \LogHero\Client\MemLogBuffer(1);
+        $logTransport = new \LogHero\Client\AsyncLogTransport(
+            $logBuffer,
+            $this->apiAccessStub,
+            'CLIENT_ID',
+            'CLIENT_SECRET',
+            '/flush.php'
+        );
+        $this->plugin->setLogTransport($logTransport);
+
     }
 
     private function buildExpectedPayload($rows) {

@@ -37,7 +37,7 @@ if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
     require_once __DIR__ . '/sdk/src/event/LogEventFactory.php';
     require_once __DIR__ . '/sdk/src/buffer/FileLogBuffer.php';
     require_once __DIR__ . '/sdk/src/http/APIAccess.php';
-    require_once __DIR__ . '/sdk/src/transport/LogTransport.php';
+    require_once __DIR__ . '/sdk/src/transport/AsyncLogTransport.php';
 
     class LogHeroClient_Plugin {
         public $clientId = 'Wordpress Plugin loghero/wp@0.1.2';
@@ -52,7 +52,7 @@ if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
             $logBuffer = new \LogHero\Client\FileLogBuffer(__DIR__ . '/logs/buffer.loghero.io.txt');
             $apiAccess = new \LogHero\Client\APIAccess($this->apiKey, $this->clientId);
             $this->logTransport = new \LogHero\Client\LogTransport($logBuffer, $apiAccess);
-            add_action('shutdown', array($this, 'sendLogEvent'));
+            add_action('shutdown', array($this, 'submitLogEvent'));
         }
 
         public static function getInstance() {
@@ -62,10 +62,9 @@ if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
             return self::$Instance;
         }
 
-        public function sendLogEvent() {
+        public function submitLogEvent() {
             $logEvent = $this->logEventFactory->create();
-            // TODO: Test this:
-            if ($logEvent->getUserAgent() == $this->clientId) {
+            if ($logEvent->getUserAgent() === $this->clientId) {
                 return;
             }
             $this->logTransport->submit($logEvent);
@@ -73,11 +72,7 @@ if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
 
         # TODO Test this function
         private function triggerFlush() {
-            # TODO Backslashes on Windows?
-            $absolutePluginDirectory = plugin_dir_path( __FILE__ );
-            $relativePluginDirectory = str_replace(ABSPATH, '/', $absolutePluginDirectory);
-            $triggerEndpoint = get_home_url() . $relativePluginDirectory . 'flush.php';
-            $curlClient = new \LogHero\Client\CurlClient($triggerEndpoint);
+            $curlClient = new \LogHero\Client\CurlClient($this->flushEndpoint());
             $curlClient->setOpt(CURLOPT_HTTPHEADER, array(
                 'Authorization: '.$this->apiKey,
                 'User-Agent: '.$this->clientId
@@ -96,7 +91,14 @@ if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
         }
 
         public function flush() {
-            $this->apiClient->flush();
+            $this->logTransport->dumpLogEvents();
+        }
+
+        protected function flushEndpoint() {
+            # TODO Backslashes on Windows?
+            $absolutePluginDirectory = plugin_dir_path( __FILE__ );
+            $relativePluginDirectory = str_replace(ABSPATH, '/', $absolutePluginDirectory);
+            return get_home_url() . $relativePluginDirectory . 'flush.php';
         }
 
     }
