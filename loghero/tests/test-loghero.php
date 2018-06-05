@@ -156,7 +156,21 @@ class LogHeroClientPluginTest extends \WP_UnitTestCase {
                 'Firefox',
                 'https://www.loghero.io'
             ]])));
-        $this->plugin->flush();
+        $this->plugin->flush('API_KEY');
+    }
+
+    /**
+     * @expectedException LogHero\Wordpress\InvalidTokenException
+     * @expectedExceptionMessage Token is invalid
+     */
+    function testAsyncLogTransportRejectOnFlushIfWrongToken() {
+        $this->setupAsyncLogTransport();
+        $this->setupServerGlobal('/page-url');
+        $this->plugin->submitLogEvent();
+        $this->apiAccessStub
+            ->expects(static::never())
+            ->method('submitLogPackage');
+        $this->plugin->flush('INVALID_TOKEN');
     }
 
     private function setupAsyncLogTransport() {
@@ -169,7 +183,6 @@ class LogHeroClientPluginTest extends \WP_UnitTestCase {
             '/flush.php'
         );
         $this->plugin->setLogTransport($logTransport);
-
     }
 
     private function buildExpectedPayload($rows) {

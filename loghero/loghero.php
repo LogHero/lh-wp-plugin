@@ -38,6 +38,7 @@ if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
     require_once __DIR__ . '/sdk/src/buffer/FileLogBuffer.php';
     require_once __DIR__ . '/sdk/src/http/APIAccess.php';
     require_once __DIR__ . '/sdk/src/transport/AsyncLogTransport.php';
+    require_once __DIR__ . '/InvalidTokenException.php';
 
     class LogHeroClient_Plugin {
         public $clientId = 'Wordpress Plugin loghero/wp@0.1.2';
@@ -76,7 +77,10 @@ if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
             $this->logTransport->submit($logEvent);
         }
 
-        public function flush() {
+        public function flush($token) {
+            if ($token !== $this->apiKey) {
+                throw new InvalidTokenException('Token is invalid');
+            }
             $this->logTransport->dumpLogEvents();
         }
 
