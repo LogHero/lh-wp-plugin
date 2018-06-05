@@ -40,11 +40,11 @@ if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
     require_once __DIR__ . '/sdk/src/transport/LogTransport.php';
 
     class LogHeroClient_Plugin {
+        public $clientId = 'Wordpress Plugin loghero/wp@0.1.2';
         protected static $Instance = false;
         protected $apiKey;
         protected $logTransport;
         protected $logEventFactory;
-        protected $clientId = 'Wordpress Plugin loghero/wp@0.1.2';
 
         public function __construct() {
             $this->apiKey = get_option('api_key');

@@ -39,7 +39,7 @@ class LogHeroClientPluginTest extends \WP_UnitTestCase {
 	function testSendLogEvent() {
         $this->setupServerGlobal('/page-url');
         $this->apiAccessStub
-            ->expects($this->once())
+            ->expects(static::once())
             ->method('submitLogPackage')
             ->with($this->equalTo($this->buildExpectedPayload([[
                 'd113ff3141723d50fec2933977c89ea6',
@@ -60,7 +60,7 @@ class LogHeroClientPluginTest extends \WP_UnitTestCase {
         $this->setupServerGlobal('/page-url');
         $_SERVER['REQUEST_TIME_FLOAT'] = null;
         $this->apiAccessStub
-            ->expects($this->once())
+            ->expects(static::once())
             ->method('submitLogPackage')
             ->with($this->equalTo($this->buildExpectedPayload([[
                 'd113ff3141723d50fec2933977c89ea6',
@@ -81,7 +81,7 @@ class LogHeroClientPluginTest extends \WP_UnitTestCase {
         remove_action('shutdown', array($this->plugin, 'sendLogEvent'));
         $this->plugin = new LogHeroClient_PluginTestImpl($this->apiAccessStub, 2);
         $this->apiAccessStub
-            ->expects($this->once())
+            ->expects(static::once())
             ->method('submitLogPackage')
             ->with($this->equalTo($this->buildExpectedPayload([
                 [
@@ -112,6 +112,15 @@ class LogHeroClientPluginTest extends \WP_UnitTestCase {
         $this->setupServerGlobal('/page-url-1');
         $this->plugin->sendLogEvent();
         $this->setupServerGlobal('/page-url-2');
+        $this->plugin->sendLogEvent();
+    }
+
+    function testIgnoreLogEventsSentByPluginItself() {
+        $this->setupServerGlobal('/page-url');
+        $_SERVER['HTTP_USER_AGENT'] = $this->plugin->clientId;
+        $this->apiAccessStub
+            ->expects(static::never())
+            ->method('submitLogPackage');
         $this->plugin->sendLogEvent();
     }
 
