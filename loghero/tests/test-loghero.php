@@ -1,6 +1,7 @@
 <?php
 namespace LogHero\Wordpress;
 require_once __DIR__ . '/mock-microtime.php';
+require_once __DIR__ . '/../sdk/src/buffer/MemLogBuffer.php';
 
 
 function microtime() {
@@ -10,13 +11,10 @@ function microtime() {
 
 class LogHeroClient_PluginTestImpl extends LogHeroClient_Plugin {
 
-    public function __construct($apiAccessStub, $maxRecordSizeInBytes=150) {
+    public function __construct($apiAccessStub, $maxBufferSize=1) {
         parent::__construct();
-        $this->apiClient = new \LogHero\Client\Client(
-            $apiAccessStub,
-            new \LogHero\Client\MemLogBuffer(150),
-            $maxRecordSizeInBytes
-        );
+        $logBuffer = new \LogHero\Client\MemLogBuffer($maxBufferSize);
+        $this->logTransport = new \LogHero\Client\LogTransport($logBuffer, $apiAccessStub);
     }
 
 }
@@ -29,7 +27,7 @@ class LogHeroClientPluginTest extends \WP_UnitTestCase {
     function setUp() {
         parent::setUp();
         update_option('api_key', 'API_KEY');
-        $this->apiAccessStub = $this->getMockBuilder(\LogHero\Client\APIAccess::class)->getMock();
+        $this->apiAccessStub = $this->getMockBuilder(\LogHero\Client\APIAccessInterface::class)->getMock();
         $this->plugin = new LogHeroClient_PluginTestImpl($this->apiAccessStub);
     }
 
@@ -81,7 +79,7 @@ class LogHeroClientPluginTest extends \WP_UnitTestCase {
 
     function testSendLogEventsInBatch() {
         remove_action('shutdown', array($this->plugin, 'sendLogEvent'));
-        $this->plugin = new LogHeroClient_PluginTestImpl($this->apiAccessStub, 151);
+        $this->plugin = new LogHeroClient_PluginTestImpl($this->apiAccessStub, 2);
         $this->apiAccessStub
             ->expects($this->once())
             ->method('submitLogPackage')
