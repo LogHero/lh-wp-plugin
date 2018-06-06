@@ -1,7 +1,6 @@
 <?php
 namespace LogHero\Wordpress;
 require_once __DIR__ . '/mock-microtime.php';
-require_once __DIR__ . '/../sdk/src/buffer/MemLogBuffer.php';
 
 
 class LogHeroClient_PluginTestImpl extends LogHeroClient_Plugin {

@@ -1,7 +1,7 @@
 <?php
 
 require_once '../../../wp-config.php';
-require_once __DIR__ . '/loghero.php';
+require_once __DIR__ . '/autoload.php';
 
 ignore_user_abort( true );
 set_time_limit(0);

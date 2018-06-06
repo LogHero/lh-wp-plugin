@@ -31,14 +31,8 @@ SOFTWARE.
 
 namespace LogHero\Wordpress;
 
-use LogHero\Client\FileLogBuffer;
-
 if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
-    require_once __DIR__ . '/sdk/src/event/LogEventFactory.php';
-    require_once __DIR__ . '/sdk/src/buffer/FileLogBuffer.php';
-    require_once __DIR__ . '/sdk/src/http/APIAccess.php';
-    require_once __DIR__ . '/sdk/src/transport/AsyncLogTransport.php';
-    require_once __DIR__ . '/InvalidTokenException.php';
+    require_once __DIR__ . '/autoload.php';
 
     class LogHeroClient_Plugin {
         public $clientId = 'Wordpress Plugin loghero/wp@0.1.2';
