@@ -34,26 +34,32 @@ namespace LogHero\Wordpress;
 use LogHero\Client\FileLogBuffer;
 
 if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
-    require_once(dirname(__FILE__) . '/sdk/src/LogHero.php');
-    require_once(dirname(__FILE__) . '/sdk/src/LogBuffer.php');
-    require_once(dirname(__FILE__) . '/sdk/src/LogEventFactory.php');
+    require_once __DIR__ . '/sdk/src/event/LogEventFactory.php';
+    require_once __DIR__ . '/sdk/src/buffer/FileLogBuffer.php';
+    require_once __DIR__ . '/sdk/src/http/APIAccess.php';
+    require_once __DIR__ . '/sdk/src/transport/AsyncLogTransport.php';
+    require_once __DIR__ . '/InvalidTokenException.php';
 
     class LogHeroClient_Plugin {
+        public $clientId = 'Wordpress Plugin loghero/wp@0.1.2';
         protected static $Instance = false;
         protected $apiKey;
-        protected $apiClient;
+        protected $logTransport;
         protected $logEventFactory;
-        protected $clientId = 'Wordpress Plugin loghero/wp@0.1.2';
 
         public function __construct() {
             $this->apiKey = get_option('api_key');
             $this->logEventFactory = new \LogHero\Client\LogEventFactory();
-            $this->apiClient = \LogHero\Client\Client::create(
-                $this->apiKey,
+            $logBuffer = new \LogHero\Client\FileLogBuffer(__DIR__ . '/logs/buffer.loghero.io.txt');
+            $apiAccess = new \LogHero\Client\APIAccess($this->apiKey, $this->clientId);
+            $this->logTransport = new \LogHero\Client\AsyncLogTransport(
+                $logBuffer,
+                $apiAccess,
                 $this->clientId,
-                new FileLogBuffer(__DIR__ . '/logs/buffer.loghero.io.txt')
+                $this->apiKey,
+                $this->flushEndpoint()
             );
-            add_action('shutdown', array($this, 'sendLogEvent'));
+            add_action('shutdown', array($this, 'submitLogEvent'));
         }
 
         public static function getInstance() {
@@ -63,9 +69,26 @@ if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
             return self::$Instance;
         }
 
-        public function sendLogEvent() {
+        public function submitLogEvent() {
             $logEvent = $this->logEventFactory->create();
-            $this->apiClient->submit($logEvent);
+            if ($logEvent->getUserAgent() === $this->clientId) {
+                return;
+            }
+            $this->logTransport->submit($logEvent);
+        }
+
+        public function flush($token) {
+            if ($token !== $this->apiKey) {
+                throw new InvalidTokenException('Token is invalid');
+            }
+            $this->logTransport->dumpLogEvents();
+        }
+
+        protected function flushEndpoint() {
+            # TODO Backslashes on Windows?
+            $absolutePluginDirectory = plugin_dir_path( __FILE__ );
+            $relativePluginDirectory = str_replace(ABSPATH, '/', $absolutePluginDirectory);
+            return get_home_url() . $relativePluginDirectory . 'flush.php';
         }
 
     }
@@ -73,6 +96,6 @@ if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
     LogHeroClient_Plugin::getInstance();
 
     if (is_admin()) {
-        require_once(dirname(__FILE__) . '/admin/loghero-admin.php');
+        require_once(__DIR__ . '/admin/loghero-admin.php');
     }
 }
