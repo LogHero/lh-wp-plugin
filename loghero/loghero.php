@@ -2,9 +2,9 @@
 /*
 Plugin Name: LogHero Client
 Version:     0.2.0
-Description: The official PHP Wordpress plugin for loghero.io.
+Description: The official PHP Wordpress plugin for log-hero.com.
 Author:      Kay Wolter
-Author URI:  https://www.funktionswerk.de/
+Author URI:  https://log-hero.com/
 License:     MIT
 
 Copyright (c) 2018 Cross Platform Solutions GmbH
