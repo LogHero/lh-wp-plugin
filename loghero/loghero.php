@@ -2,7 +2,7 @@
 /*
 Plugin Name: LogHero Client
 Version:     0.2.0
-Description: The official PHP Wordpress plugin for log-hero.com.
+Description: Analyze how search engines and other bots crawl and understand your web page. The official PHP Wordpress plugin for log-hero.com.
 Author:      Kay Wolter
 Author URI:  https://log-hero.com/
 License:     MIT
