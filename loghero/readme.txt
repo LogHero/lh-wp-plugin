@@ -60,7 +60,7 @@ Log Hero helps you to identify many issues concerning technical optimization of 
 * Do search engine bots crawl my page with a desktop or mobile device?
 * How long does the bot need to download the resources of my site?
 * How many users does my normal Google Analytics system not track because they have disabled the tracker or Javascript?
-* and much more. Visit[log-hero.com](https://log-hero.com)! for more information
+* and much more. Visit [log-hero.com](https://log-hero.com)! for more information
 
 ### Bug reports
 
