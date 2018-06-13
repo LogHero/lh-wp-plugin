@@ -140,8 +140,9 @@ class LogHeroPluginTest extends \WP_UnitTestCase {
     }
 
     function testIgnoreLogEventsSentByPluginItself() {
+        $settings = new LogHeroSettings();
         $this->setupServerGlobal('/page-url');
-        $_SERVER['HTTP_USER_AGENT'] = \LogHero\Wordpress\LogHeroSettings::$clientId;
+        $_SERVER['HTTP_USER_AGENT'] = $settings->clientId;
         $this->apiAccessStub
             ->expects(static::never())
             ->method('submitLogPackage');

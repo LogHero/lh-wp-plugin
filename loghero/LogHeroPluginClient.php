@@ -11,23 +11,25 @@ use \LogHero\Client\AsyncLogTransport;
 class LogHeroPluginClient {
     private $apiKeyStorage;
     private $logEventFactory;
+    private $settings;
 
     public function __construct($flushEndpoint = null, $apiKeyStorage = null, $logBuffer = null, $apiAccess = null) {
+        $this->settings = new LogHeroSettings();
         if (!$apiKeyStorage) {
-            $apiKeyStorage = new APIKeyFileStorage(LogHeroSettings::$apiKeyStorageFile);
+            $apiKeyStorage = new APIKeyFileStorage($this->settings->apiKeyStorageFile);
         }
         $this->apiKeyStorage = $apiKeyStorage;
         if (!$apiAccess) {
-            $apiAccess = new APIAccess($this->apiKeyStorage, LogHeroSettings::$clientId);
+            $apiAccess = new APIAccess($this->apiKeyStorage, $this->settings->clientId);
         }
         $this->logEventFactory = new LogEventFactory();
         if (!$logBuffer) {
-            $logBuffer = new FileLogBuffer(LogHeroSettings::$logEventsBufferFile);
+            $logBuffer = new FileLogBuffer($this->settings->logEventsBufferFile);
         }
         $this->logTransport = new AsyncLogTransport(
             $logBuffer,
             $apiAccess,
-            LogHeroSettings::$clientId,
+            $this->settings->clientId,
             $this->apiKeyStorage->getKey(),
             $flushEndpoint
         );
@@ -35,7 +37,7 @@ class LogHeroPluginClient {
 
     public function submitLogEvent() {
         $logEvent = $this->logEventFactory->create();
-        if ($logEvent->getUserAgent() === LogHeroSettings::$clientId) {
+        if ($logEvent->getUserAgent() === $this->settings->clientId) {
             return;
         }
         $this->logTransport->submit($logEvent);
@@ -49,7 +51,8 @@ class LogHeroPluginClient {
     }
 
     public static function refreshAPIKey($apiKey) {
-        $apiKeyStorage = new APIKeyFileStorage(LogHeroSettings::$apiKeyStorageFile);
+        $settings = new LogHeroSettings();
+        $apiKeyStorage = new APIKeyFileStorage($settings->apiKeyStorageFile);
         $apiKeyStorage->setKey($apiKey);
     }
 }
