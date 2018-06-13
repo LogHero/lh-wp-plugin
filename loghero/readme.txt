@@ -64,7 +64,7 @@ Log Hero helps you to identify many issues concerning technical optimization of 
 
 ### Bug reports
 
-Bug reports for Log Hero are [appreciated on GitHub](https://github.com/atript/lh-wp-plugin/issues). Please note that GitHub is not a support forum, and issues that aren't adequately qualified as bugs are closed.
+Bug reports for Log Hero are [appreciated on GitHub](https://github.com/LogHero/lh-wp-plugin/issues). Please note that GitHub is not a support forum, and issues that aren't adequately qualified as bugs are closed.
 
 ### Further Reading
 

@@ -3,7 +3,7 @@
 Install [VirtualBox](https://www.virtualbox.org/), [Vagrant](https://www.vagrantup.com/) and [Ansible](http://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html).
 Checkout the repository and start the virtual machine:
 ```
-git clone --recursive git@github.com:atript/lh-wp-plugin.git
+git clone --recursive git@github.com:LogHero/lh-wp-plugin.git
 cd lh-wp-plugin/
 vagrant up
 ```
