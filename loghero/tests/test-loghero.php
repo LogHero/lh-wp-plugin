@@ -1,12 +1,28 @@
 <?php
 namespace LogHero\Wordpress;
+
+
 require_once __DIR__ . '/mock-microtime.php';
 
 
-class LogHeroClient_PluginTestImpl extends LogHeroClient_Plugin {
+class LogHero_PluginTestImpl extends LogHero_Plugin {
 
-    public function setLogTransport(\LogHero\Client\LogTransportInterface $logTranport) {
-        $this->logTransport = $logTranport;
+    public function __construct($fileKeyStorage, $logBuffer, $apiAccessStub) {
+        parent::__construct();
+        $this->logHeroClient = new \LogHero\Wordpress\LogHeroPluginClient(
+            '/flush.php',
+            $fileKeyStorage,
+            $logBuffer,
+            $apiAccessStub
+        );
+    }
+
+    public function onShutdownAction() {
+        $this->logHeroClient->submitLogEvent();
+    }
+
+    public function onAsyncFlushAction($apiKey) {
+        $this->logHeroClient->flush($apiKey);
     }
 
     public function getFlushTriggerUrl() {
@@ -16,25 +32,34 @@ class LogHeroClient_PluginTestImpl extends LogHeroClient_Plugin {
 }
 
 
-class LogHeroClientPluginTest extends \WP_UnitTestCase {
+class LogHeroPluginTest extends \WP_UnitTestCase {
+    private $apiKey = 'API_KEY';
+    private $apiKeyStorage;
     private $plugin;
     private $apiAccessStub;
 
     function setUp() {
         parent::setUp();
-        update_option('api_key', 'API_KEY');
+        $this->apiKeyStorage = new \LogHero\Client\APIKeyMemStorage();
+        $this->apiKeyStorage->setKey($this->apiKey);
         $this->apiAccessStub = $this->getMockBuilder(\LogHero\Client\APIAccessInterface::class)->getMock();
-        $this->plugin = new LogHeroClient_PluginTestImpl($this->apiAccessStub);
-        $logBuffer = new \LogHero\Client\MemLogBuffer(1);
-        $this->plugin->setLogTransport(new \LogHero\Client\LogTransport($logBuffer, $this->apiAccessStub));
+        $this->plugin = new LogHero_PluginTestImpl($this->apiKeyStorage, new \LogHero\Client\MemLogBuffer(10), $this->apiAccessStub);
     }
 
     function tearDown() {
-        remove_action('shutdown', array(LogHeroClient_Plugin::getInstance(), 'sendLogEvent'));
+        remove_action('shutdown', array(LogHero_Plugin::getInstance(), 'sendLogEvent'));
         remove_action('shutdown', array($this->plugin, 'sendLogEvent'));
     }
 
-	function testSubmitLogEvent() {
+    function testNoSendOnSubmit() {
+        $this->setupServerGlobal('/page-url');
+        $this->apiAccessStub
+            ->expects(static::never())
+            ->method('submitLogPackage');
+        $this->plugin->onShutdownAction();
+    }
+
+	function testSubmitLogEventOnFlush() {
         $this->setupServerGlobal('/page-url');
         $this->apiAccessStub
             ->expects(static::once())
@@ -51,7 +76,8 @@ class LogHeroClientPluginTest extends \WP_UnitTestCase {
                 'Firefox',
                 'https://www.loghero.io'
             ]])));
-        $this->plugin->submitLogEvent();
+        $this->plugin->onShutdownAction();
+        $this->plugin->onAsyncFlushAction($this->apiKey);
 	}
 
 	function testSubmitLogEventWithoutPageLoadTimeIfNoRequestTime() {
@@ -72,13 +98,11 @@ class LogHeroClientPluginTest extends \WP_UnitTestCase {
                 'Firefox',
                 'https://www.loghero.io'
             ]])));
-        $this->plugin->submitLogEvent();
+        $this->plugin->onShutdownAction();
+        $this->plugin->onAsyncFlushAction($this->apiKey);
     }
 
     function testSendLogEventsInBatch() {
-        remove_action('shutdown', array($this->plugin, 'submitLogEvent'));
-        $logBuffer = new \LogHero\Client\MemLogBuffer(2);
-        $this->plugin->setLogTransport(new \LogHero\Client\LogTransport($logBuffer, $this->apiAccessStub));
         $this->apiAccessStub
             ->expects(static::once())
             ->method('submitLogPackage')
@@ -109,53 +133,24 @@ class LogHeroClientPluginTest extends \WP_UnitTestCase {
                 ]
             ])));
         $this->setupServerGlobal('/page-url-1');
-        $this->plugin->submitLogEvent();
+        $this->plugin->onShutdownAction();
         $this->setupServerGlobal('/page-url-2');
-        $this->plugin->submitLogEvent();
+        $this->plugin->onShutdownAction();
+        $this->plugin->onAsyncFlushAction($this->apiKey);
     }
 
     function testIgnoreLogEventsSentByPluginItself() {
         $this->setupServerGlobal('/page-url');
-        $_SERVER['HTTP_USER_AGENT'] = $this->plugin->clientId;
+        $_SERVER['HTTP_USER_AGENT'] = \LogHero\Wordpress\LogHeroSettings::$clientId;
         $this->apiAccessStub
             ->expects(static::never())
             ->method('submitLogPackage');
-        $this->plugin->submitLogEvent();
+        $this->plugin->onShutdownAction();
+        $this->plugin->onAsyncFlushAction($this->apiKey);
     }
 
     function testCreateUrlForFlushEndpoint() {
         static::assertEquals('http://example.org/var/www/html/wp-content/plugins/loghero/flush.php', $this->plugin->getFlushTriggerUrl());
-    }
-
-    function testAsyncLogTransportNoSendOnSubmit() {
-        $this->setupAsyncLogTransport();
-        $this->setupServerGlobal('/page-url');
-        $this->apiAccessStub
-            ->expects(static::never())
-            ->method('submitLogPackage');
-        $this->plugin->submitLogEvent();
-    }
-
-    function testAsyncLogTransportSendOnFlush() {
-        $this->setupAsyncLogTransport();
-        $this->setupServerGlobal('/page-url');
-        $this->plugin->submitLogEvent();
-        $this->apiAccessStub
-            ->expects(static::once())
-            ->method('submitLogPackage')
-            ->with($this->equalTo($this->buildExpectedPayload([[
-                'd113ff3141723d50fec2933977c89ea6',
-                'example.org',
-                '/page-url',
-                'POST',
-                301,
-                '2018-04-11T06:48:18+00:00',
-                2389,
-                'f528764d624db129b32c21fbca0cb8d6',
-                'Firefox',
-                'https://www.loghero.io'
-            ]])));
-        $this->plugin->flush('API_KEY');
     }
 
     /**
@@ -163,25 +158,12 @@ class LogHeroClientPluginTest extends \WP_UnitTestCase {
      * @expectedExceptionMessage Token is invalid
      */
     function testAsyncLogTransportRejectOnFlushIfWrongToken() {
-        $this->setupAsyncLogTransport();
         $this->setupServerGlobal('/page-url');
-        $this->plugin->submitLogEvent();
+        $this->plugin->onShutdownAction();
         $this->apiAccessStub
             ->expects(static::never())
             ->method('submitLogPackage');
-        $this->plugin->flush('INVALID_TOKEN');
-    }
-
-    private function setupAsyncLogTransport() {
-        $logBuffer = new \LogHero\Client\MemLogBuffer(1);
-        $logTransport = new \LogHero\Client\AsyncLogTransport(
-            $logBuffer,
-            $this->apiAccessStub,
-            'CLIENT_ID',
-            'CLIENT_SECRET',
-            '/flush.php'
-        );
-        $this->plugin->setLogTransport($logTransport);
+        $this->plugin->onAsyncFlushAction('INVALID_TOKEN');
     }
 
     private function buildExpectedPayload($rows) {

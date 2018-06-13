@@ -35,26 +35,13 @@ namespace LogHero\Wordpress;
 if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
     require_once __DIR__ . '/autoload.php';
 
-    class LogHeroClient_Plugin {
-        public $clientId = 'Wordpress Plugin loghero/wp@0.2.0';
+    class LogHero_Plugin {
         protected static $Instance = false;
-        protected $apiKey;
-        protected $logTransport;
-        protected $logEventFactory;
+        protected $logHeroClient;
 
         public function __construct() {
-            $this->apiKeyStorage = new \LogHero\Client\APIKeyFileStorage(__DIR__ . '/logs/key.loghero.io.txt');
-            $this->logEventFactory = new \LogHero\Client\LogEventFactory();
-            $logBuffer = new \LogHero\Client\FileLogBuffer(__DIR__ . '/logs/buffer.loghero.io.txt');
-            $apiAccess = new \LogHero\Client\APIAccess($this->apiKeyStorage, $this->clientId);
-            $this->logTransport = new \LogHero\Client\AsyncLogTransport(
-                $logBuffer,
-                $apiAccess,
-                $this->clientId,
-                $this->apiKey,
-                $this->flushEndpoint()
-            );
-            add_action('shutdown', array($this, 'submitLogEvent'));
+            $this->logHeroClient = new \LogHero\Wordpress\LogHeroPluginClient($this->flushEndpoint());
+            add_action('shutdown', array($this->logHeroClient, 'submitLogEvent'));
         }
 
         public static function getInstance() {
@@ -62,21 +49,6 @@ if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
                 self::$Instance = new self();
             }
             return self::$Instance;
-        }
-
-        public function submitLogEvent() {
-            $logEvent = $this->logEventFactory->create();
-            if ($logEvent->getUserAgent() === $this->clientId) {
-                return;
-            }
-            $this->logTransport->submit($logEvent);
-        }
-
-        public function flush($token) {
-            if ($token !== $this->apiKeyStorage->getKey()) {
-                throw new InvalidTokenException('Token is invalid');
-            }
-            $this->logTransport->dumpLogEvents();
         }
 
         protected function flushEndpoint() {
@@ -88,7 +60,7 @@ if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
 
     }
 
-    LogHeroClient_Plugin::getInstance();
+    LogHero_Plugin::getInstance();
 
     if (is_admin()) {
         require_once(__DIR__ . '/admin/loghero-admin.php');
