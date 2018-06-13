@@ -8,7 +8,9 @@ spl_autoload_register(
         if ($classes === null) {
             $classes = array(
                 'loghero\\wordpress\\invalidtokenexception' => '/InvalidTokenException.php',
-                'loghero\\wordpress\\logheroclient_plugin' => '/loghero.php',
+                'loghero\\wordpress\\loghero_plugin' => '/loghero.php',
+                'loghero\\wordpress\\logheropluginclient' => '/LogHeroPluginClient.php',
+                'loghero\\wordpress\\logherosettings' => '/LogHeroSettings.php'
             );
         }
         $cn = strtolower($class);
