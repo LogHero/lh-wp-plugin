@@ -2,6 +2,9 @@
 namespace LogHero\Wordpress;
 
 
+use LogHero\Client\APIKeyMemStorage;
+use LogHero\Client\APIKeyUndefinedException;
+
 require_once __DIR__ . '/mock-microtime.php';
 
 
@@ -9,12 +12,16 @@ class LogHero_PluginTestImpl extends LogHero_Plugin {
 
     public function __construct($fileKeyStorage, $logBuffer, $apiAccessStub) {
         parent::__construct();
-        $this->logHeroClient = new \LogHero\Wordpress\LogHeroPluginClient(
-            '/flush.php',
-            $fileKeyStorage,
-            $logBuffer,
-            $apiAccessStub
-        );
+        try {
+            $this->logHeroClient = new \LogHero\Wordpress\LogHeroPluginClient(
+                '/flush.php',
+                $fileKeyStorage,
+                $logBuffer,
+                $apiAccessStub
+            );
+        }
+        catch(APIKeyUndefinedException $e) {
+        }
     }
 
     public function onShutdownAction() {
@@ -165,6 +172,10 @@ class LogHeroPluginTest extends \WP_UnitTestCase {
             ->expects(static::never())
             ->method('submitLogPackage');
         $this->plugin->onAsyncFlushAction('INVALID_TOKEN');
+    }
+
+    function testInstantiatePluginWithoutExceptionIfKeyNotSet() {
+        new LogHero_PluginTestImpl(new APIKeyMemStorage(), new \LogHero\Client\MemLogBuffer(10), $this->apiAccessStub);
     }
 
     private function buildExpectedPayload($rows) {
