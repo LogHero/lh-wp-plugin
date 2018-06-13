@@ -30,6 +30,7 @@ SOFTWARE.
 */
 
 namespace LogHero\Wordpress;
+use \LogHero\Client\APIKeyUndefinedException;
 
 
 if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
@@ -40,8 +41,12 @@ if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
         protected $logHeroClient;
 
         public function __construct() {
-            $this->logHeroClient = new LogHeroPluginClient($this->flushEndpoint());
-            add_action('shutdown', array($this->logHeroClient, 'submitLogEvent'));
+            try {
+                $this->logHeroClient = new LogHeroPluginClient($this->flushEndpoint());
+                add_action('shutdown', array($this->logHeroClient, 'submitLogEvent'));
+            }
+            catch (APIKeyUndefinedException $e) {
+            }
         }
 
         public static function getInstance() {
