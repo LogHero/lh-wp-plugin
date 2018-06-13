@@ -40,7 +40,7 @@ if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
         protected $logHeroClient;
 
         public function __construct() {
-            $this->logHeroClient = new \LogHero\Wordpress\LogHeroPluginClient($this->flushEndpoint());
+            $this->logHeroClient = new LogHeroPluginClient($this->flushEndpoint());
             add_action('shutdown', array($this->logHeroClient, 'submitLogEvent'));
         }
 

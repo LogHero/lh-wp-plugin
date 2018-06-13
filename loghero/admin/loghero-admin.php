@@ -51,11 +51,10 @@ function loghero_admin_init() {
 }
 
 function loghero_api_key_input_renderer() {
-    # TODO: Reuse from plugin
-    $apiKeyStorage = new \LogHero\Client\APIKeyFileStorage(__DIR__ . '/../logs/key.loghero.io.txt');
-    $apiKeyStorage->setKey(get_option('api_key'));
+    $apiKeyFromDb = get_option('api_key');
+    \LogHero\Wordpress\LogHeroPluginClient::refreshAPIKey($apiKeyFromDb);
     ?>
-    <input type="text" name="api_key" id="api_key" value="<?php echo get_option('api_key'); ?>" />
+    <input type="text" name="api_key" id="api_key" value="<?php echo $apiKeyFromDb; ?>" />
     <?php
 }
 
