@@ -31,6 +31,7 @@ SOFTWARE.
 
 namespace LogHero\Wordpress;
 
+
 if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
     require_once __DIR__ . '/autoload.php';
 
@@ -42,10 +43,10 @@ if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
         protected $logEventFactory;
 
         public function __construct() {
-            $this->apiKey = get_option('api_key');
+            $this->apiKeyStorage = new \LogHero\Client\APIKeyFileStorage(__DIR__ . '/logs/key.loghero.io.txt');
             $this->logEventFactory = new \LogHero\Client\LogEventFactory();
             $logBuffer = new \LogHero\Client\FileLogBuffer(__DIR__ . '/logs/buffer.loghero.io.txt');
-            $apiAccess = new \LogHero\Client\APIAccess($this->apiKey, $this->clientId);
+            $apiAccess = new \LogHero\Client\APIAccess($this->apiKeyStorage, $this->clientId);
             $this->logTransport = new \LogHero\Client\AsyncLogTransport(
                 $logBuffer,
                 $apiAccess,
@@ -72,7 +73,7 @@ if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
         }
 
         public function flush($token) {
-            if ($token !== $this->apiKey) {
+            if ($token !== $this->apiKeyStorage->getKey()) {
                 throw new InvalidTokenException('Token is invalid');
             }
             $this->logTransport->dumpLogEvents();

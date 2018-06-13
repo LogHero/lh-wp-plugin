@@ -1,6 +1,5 @@
 <?php
 
-require_once '../../../wp-config.php';
 require_once __DIR__ . '/autoload.php';
 
 ignore_user_abort( true );
@@ -19,5 +18,12 @@ if(session_id()) {
     session_write_close();
 }
 
-$logHero = \LogHero\Wordpress\LogHeroClient_Plugin::getInstance();
-$logHero->flush($_SERVER['HTTP_TOKEN']);
+$apiKeyStorage = new \LogHero\Client\APIKeyFileStorage(__DIR__ . '/logs/key.loghero.io.txt');
+$logEventFactory = new \LogHero\Client\LogEventFactory();
+$logBuffer = new \LogHero\Client\FileLogBuffer(__DIR__ . '/logs/buffer.loghero.io.txt');
+$apiAccess = new \LogHero\Client\APIAccess($apiKeyStorage, 'CLIENT ID');
+$logTransport = new \LogHero\Client\LogTransport(
+    $logBuffer,
+    $apiAccess
+);
+$logTransport->flush();
