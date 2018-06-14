@@ -1,10 +1,10 @@
 <?php
 /*
 Plugin Name: LogHero Client
-Version:     0.1.2
-Description: The official PHP Wordpress plugin for loghero.io.
+Version:     0.2.0
+Description: Analyze how search engines and other bots crawl and understand your web page. The official PHP Wordpress plugin for log-hero.com.
 Author:      Kay Wolter
-Author URI:  https://www.funktionswerk.de/
+Author URI:  https://log-hero.com/
 License:     MIT
 
 Copyright (c) 2018 Cross Platform Solutions GmbH
@@ -30,30 +30,27 @@ SOFTWARE.
 */
 
 namespace LogHero\Wordpress;
+use \LogHero\Client\APIKeyUndefinedException;
 
-use LogHero\Client\FileLogBuffer;
 
-if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
-    require_once(dirname(__FILE__) . '/sdk/src/LogHero.php');
-    require_once(dirname(__FILE__) . '/sdk/src/LogBuffer.php');
-    require_once(dirname(__FILE__) . '/sdk/src/LogEventFactory.php');
+if (!class_exists( 'LogHeroClient_Plugin')) {
+    require_once __DIR__ . '/autoload.php';
 
-    class LogHeroClient_Plugin {
+    class LogHero_Plugin {
         protected static $Instance = false;
-        protected $apiKey;
-        protected $apiClient;
-        protected $logEventFactory;
-        protected $clientId = 'Wordpress Plugin loghero/wp@0.1.2';
+        protected $logHeroClient;
 
         public function __construct() {
-            $this->apiKey = get_option('api_key');
-            $this->logEventFactory = new \LogHero\Client\LogEventFactory();
-            $this->apiClient = \LogHero\Client\Client::create(
-                $this->apiKey,
-                $this->clientId,
-                new FileLogBuffer(__DIR__ . '/logs/buffer.loghero.io.txt')
-            );
-            add_action('shutdown', array($this, 'sendLogEvent'));
+            try {
+                $this->initialize();
+            }
+            catch (APIKeyUndefinedException $e) {
+                $apiKeyFromDb = get_option('api_key');
+                if ($apiKeyFromDb) {
+                    LogHeroPluginClient::refreshAPIKey(get_option('api_key'));
+                    $this->initialize();
+                }
+            }
         }
 
         public static function getInstance() {
@@ -63,16 +60,22 @@ if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
             return self::$Instance;
         }
 
-        public function sendLogEvent() {
-            $logEvent = $this->logEventFactory->create();
-            $this->apiClient->submit($logEvent);
+        protected function flushEndpoint() {
+            # TODO Backslashes on Windows?
+            $absolutePluginDirectory = plugin_dir_path( __FILE__ );
+            $relativePluginDirectory = str_replace(ABSPATH, '/', $absolutePluginDirectory);
+            return get_home_url() . $relativePluginDirectory . 'flush.php';
         }
 
+        private function initialize() {
+            $this->logHeroClient = new LogHeroPluginClient($this->flushEndpoint());
+            add_action('shutdown', array($this->logHeroClient, 'submitLogEvent'));
+        }
     }
 
-    LogHeroClient_Plugin::getInstance();
+    LogHero_Plugin::getInstance();
 
     if (is_admin()) {
-        require_once(dirname(__FILE__) . '/admin/loghero-admin.php');
+        require_once(__DIR__ . '/admin/loghero-admin.php');
     }
 }

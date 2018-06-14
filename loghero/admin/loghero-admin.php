@@ -51,8 +51,10 @@ function loghero_admin_init() {
 }
 
 function loghero_api_key_input_renderer() {
+    $apiKeyFromDb = get_option('api_key');
+    \LogHero\Wordpress\LogHeroPluginClient::refreshAPIKey($apiKeyFromDb);
     ?>
-    <input type="text" name="api_key" id="api_key" value="<?php echo get_option('api_key'); ?>" />
+    <input type="text" name="api_key" id="api_key" value="<?php echo $apiKeyFromDb; ?>" />
     <?php
 }
 
@@ -73,7 +75,7 @@ function setup_api_key_admin_notice(){
     $currentApiKey = get_option('api_key');
     if (!$currentApiKey) {
         echo '<div class="notice notice-warning is-dismissible">
-                 <p>Your LogHero API key is not setup. Please go to the <a href="/wp-admin/options-general.php?page=loghero">LogHero settings page</a> and enter the API key retrieved from <a href="www.loghero.io">loghero.io</a>.</p>
+                 <p>Your LogHero API key is not setup. Please go to the <a href="/wp-admin/options-general.php?page=loghero">LogHero settings page</a> and enter the API key retrieved from <a target="_blank" href="https://log-hero.com">log-hero.com</a>.</p>
              </div>';
     }
 }
