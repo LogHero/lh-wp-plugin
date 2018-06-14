@@ -1,10 +1,6 @@
 <?php
 namespace LogHero\Wordpress;
 
-
-use LogHero\Client\APIKeyMemStorage;
-use LogHero\Client\APIKeyUndefinedException;
-
 require_once __DIR__ . '/mock-microtime.php';
 
 
@@ -14,6 +10,7 @@ class LogHero_PluginTestImpl extends LogHero_Plugin {
         parent::__construct();
         if ($apiAccessStub) {
             $this->logHeroClient = new \LogHero\Wordpress\LogHeroPluginClient(
+                new LogHeroAPISettings(),
                 '/flush.php',
                 $apiAccessStub
             );

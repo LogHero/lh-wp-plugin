@@ -68,7 +68,7 @@ if (!class_exists( 'LogHeroClient_Plugin')) {
         }
 
         private function initialize() {
-            $this->logHeroClient = new LogHeroPluginClient($this->flushEndpoint());
+            $this->logHeroClient = new LogHeroPluginClient(new LogHeroAPISettings(), $this->flushEndpoint());
             add_action('shutdown', array($this->logHeroClient, 'submitLogEvent'));
         }
     }
