@@ -10,7 +10,7 @@ spl_autoload_register(
                 'loghero\\wordpress\\invalidtokenexception' => '/InvalidTokenException.php',
                 'loghero\\wordpress\\loghero_plugin' => '/loghero.php',
                 'loghero\\wordpress\\logheropluginclient' => '/LogHeroPluginClient.php',
-                'loghero\\wordpress\\logherosettings' => '/LogHeroSettings.php'
+                'loghero\\wordpress\\logheroglobals' => '/LogHeroGlobals.php'
             );
         }
         $cn = strtolower($class);

@@ -11,25 +11,18 @@ use \LogHero\Client\AsyncLogTransport;
 class LogHeroPluginClient {
     private $apiKeyStorage;
     private $logEventFactory;
-    private $settings;
 
-    public function __construct($flushEndpoint = null, $apiKeyStorage = null, $logBuffer = null, $apiAccess = null) {
-        $this->settings = new LogHeroSettings();
-        if (!$apiKeyStorage) {
-            $apiKeyStorage = new APIKeyFileStorage($this->settings->apiKeyStorageFile);
-        }
-        $this->apiKeyStorage = $apiKeyStorage;
+    public function __construct($flushEndpoint = null, $apiAccess = null) {
+        $clientId = LogHeroGlobals::Instance()->getClientId();
+        $this->apiKeyStorage = new APIKeyFileStorage(LogHeroGlobals::Instance()->getAPIKeyStorageFilename());
         if (!$apiAccess) {
-            $apiAccess = new APIAccess($this->apiKeyStorage, $this->settings->clientId);
+            $apiAccess = new APIAccess($this->apiKeyStorage, $clientId);
         }
         $this->logEventFactory = new LogEventFactory();
-        if (!$logBuffer) {
-            $logBuffer = new FileLogBuffer($this->settings->logEventsBufferFile);
-        }
         $this->logTransport = new AsyncLogTransport(
-            $logBuffer,
+            new FileLogBuffer(LogHeroGlobals::Instance()->getLogEventsBufferFilename()),
             $apiAccess,
-            $this->settings->clientId,
+            $clientId,
             $this->apiKeyStorage->getKey(),
             $flushEndpoint
         );
@@ -37,7 +30,7 @@ class LogHeroPluginClient {
 
     public function submitLogEvent() {
         $logEvent = $this->logEventFactory->create();
-        if ($logEvent->getUserAgent() === $this->settings->clientId) {
+        if ($logEvent->getUserAgent() === LogHeroGlobals::Instance()->getClientId()) {
             return;
         }
         $this->logTransport->submit($logEvent);
@@ -51,8 +44,7 @@ class LogHeroPluginClient {
     }
 
     public static function refreshAPIKey($apiKey) {
-        $settings = new LogHeroSettings();
-        $apiKeyStorage = new APIKeyFileStorage($settings->apiKeyStorageFile);
+        $apiKeyStorage = new APIKeyFileStorage(LogHeroGlobals::Instance()->getAPIKeyStorageFilename());
         $apiKeyStorage->setKey($apiKey);
     }
 }

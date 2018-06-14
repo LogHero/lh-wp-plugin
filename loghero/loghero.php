@@ -33,7 +33,7 @@ namespace LogHero\Wordpress;
 use \LogHero\Client\APIKeyUndefinedException;
 
 
-if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
+if (!class_exists( 'LogHeroClient_Plugin')) {
     require_once __DIR__ . '/autoload.php';
 
     class LogHero_Plugin {
@@ -42,10 +42,14 @@ if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
 
         public function __construct() {
             try {
-                $this->logHeroClient = new LogHeroPluginClient($this->flushEndpoint());
-                add_action('shutdown', array($this->logHeroClient, 'submitLogEvent'));
+                $this->initialize();
             }
             catch (APIKeyUndefinedException $e) {
+                $apiKeyFromDb = get_option('api_key');
+                if ($apiKeyFromDb) {
+                    LogHeroPluginClient::refreshAPIKey(get_option('api_key'));
+                    $this->initialize();
+                }
             }
         }
 
@@ -63,6 +67,10 @@ if ( !class_exists( 'LogHeroClient_Plugin' ) ) {
             return get_home_url() . $relativePluginDirectory . 'flush.php';
         }
 
+        private function initialize() {
+            $this->logHeroClient = new LogHeroPluginClient($this->flushEndpoint());
+            add_action('shutdown', array($this->logHeroClient, 'submitLogEvent'));
+        }
     }
 
     LogHero_Plugin::getInstance();
