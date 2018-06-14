@@ -80,3 +80,5 @@ function setup_api_key_admin_notice(){
     }
 }
 add_action('admin_notices', 'setup_api_key_admin_notice');
+
+require_once __DIR__ . '/loghero-admin-dev.php';
