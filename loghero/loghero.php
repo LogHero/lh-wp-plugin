@@ -47,9 +47,10 @@ if (!class_exists( 'LogHeroClient_Plugin')) {
             catch (APIKeyUndefinedException $e) {
                 $apiKeyFromDb = get_option('api_key');
                 if ($apiKeyFromDb) {
-                    LogHeroPluginClient::refreshAPIKey(get_option('api_key'));
+                    LogHeroGlobals::Instance()->refreshAPIKey($apiKeyFromDb);
                     $this->initialize();
                 }
+                self::refreshAPISettings();
             }
         }
 
@@ -60,6 +61,14 @@ if (!class_exists( 'LogHeroClient_Plugin')) {
             return self::$Instance;
         }
 
+        public static function refreshAPISettings() {
+            $apiEndpointFromDb = get_option('api_endpoint');
+            if ($apiEndpointFromDb) {
+                $apiSettings = new \LogHero\Wordpress\LogHeroAPISettings();
+                $apiSettings->setAPILogPackageEndpoint($apiEndpointFromDb);
+            }
+        }
+
         protected function flushEndpoint() {
             # TODO Backslashes on Windows?
             $absolutePluginDirectory = plugin_dir_path( __FILE__ );
@@ -68,7 +77,7 @@ if (!class_exists( 'LogHeroClient_Plugin')) {
         }
 
         private function initialize() {
-            $this->logHeroClient = new LogHeroPluginClient($this->flushEndpoint());
+            $this->logHeroClient = new LogHeroPluginClient(new LogHeroAPISettings(), $this->flushEndpoint());
             add_action('shutdown', array($this->logHeroClient, 'submitLogEvent'));
         }
     }

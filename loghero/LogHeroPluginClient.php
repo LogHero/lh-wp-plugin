@@ -3,6 +3,7 @@
 namespace LogHero\Wordpress;
 use \LogHero\Client\APIKeyFileStorage;
 use \LogHero\Client\APIAccess;
+use LogHero\Client\APISettingsInterface;
 use \LogHero\Client\LogEventFactory;
 use \LogHero\Client\FileLogBuffer;
 use \LogHero\Client\AsyncLogTransport;
@@ -12,11 +13,11 @@ class LogHeroPluginClient {
     private $apiKeyStorage;
     private $logEventFactory;
 
-    public function __construct($flushEndpoint = null, $apiAccess = null) {
+    public function __construct(APISettingsInterface $apiSettings, $flushEndpoint = null, $apiAccess = null) {
         $clientId = LogHeroGlobals::Instance()->getClientId();
         $this->apiKeyStorage = new APIKeyFileStorage(LogHeroGlobals::Instance()->getAPIKeyStorageFilename());
         if (!$apiAccess) {
-            $apiAccess = new APIAccess($this->apiKeyStorage, $clientId);
+            $apiAccess = new APIAccess($this->apiKeyStorage, $clientId, $apiSettings);
         }
         $this->logEventFactory = new LogEventFactory();
         $this->logTransport = new AsyncLogTransport(
@@ -41,10 +42,5 @@ class LogHeroPluginClient {
             throw new InvalidTokenException('Token is invalid');
         }
         $this->logTransport->dumpLogEvents();
-    }
-
-    public static function refreshAPIKey($apiKey) {
-        $apiKeyStorage = new APIKeyFileStorage(LogHeroGlobals::Instance()->getAPIKeyStorageFilename());
-        $apiKeyStorage->setKey($apiKey);
     }
 }

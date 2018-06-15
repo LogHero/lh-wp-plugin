@@ -1,11 +1,13 @@
 <?php
 
 namespace LogHero\Wordpress;
+use \LogHero\Client\APIKeyFileStorage;
 
 
 class LogHeroGlobals {
     private $logEventsBufferFile;
     private $apiKeyStorageFile;
+    private $apiSettings;
     private static $Instance;
 
     private function __construct() {
@@ -38,5 +40,10 @@ class LogHeroGlobals {
 
     public function getAPIKeyStorageFilename() {
         return $this->apiKeyStorageFile;
+    }
+
+    public function refreshAPIKey($apiKey) {
+        $apiKeyStorage = new APIKeyFileStorage($this->getAPIKeyStorageFilename());
+        $apiKeyStorage->setKey($apiKey);
     }
 }
