@@ -50,6 +50,7 @@ if (!class_exists( 'LogHeroClient_Plugin')) {
                     LogHeroGlobals::Instance()->refreshAPIKey(get_option('api_key'));
                     $this->initialize();
                 }
+                self::refreshAPISettings();
             }
         }
 
@@ -58,6 +59,14 @@ if (!class_exists( 'LogHeroClient_Plugin')) {
                 self::$Instance = new self();
             }
             return self::$Instance;
+        }
+
+        public static function refreshAPISettings() {
+            $apiEndpointFromDb = get_option('api_endpoint');
+            if ($apiEndpointFromDb) {
+                $apiSettings = new \LogHero\Wordpress\LogHeroAPISettings();
+                $apiSettings->setAPILogPackageEndpoint($apiEndpointFromDb);
+            }
         }
 
         protected function flushEndpoint() {

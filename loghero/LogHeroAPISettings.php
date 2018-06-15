@@ -38,6 +38,7 @@ class LogHeroAPISettings extends APISettingsDefault {
             return;
         }
         $jsonString = file_get_contents($this->apiDevSettingsFile);
+        chmod($this->apiDevSettingsFile, 0666);
         $json = json_decode($jsonString, true);
         if (!$json) {
             return;
