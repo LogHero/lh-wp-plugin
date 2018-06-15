@@ -31,6 +31,10 @@ class LogHeroAPISettingsTest extends \WP_UnitTestCase {
         $this->assertEndpointInDevSettingsFile('https://test.loghero.io/logs/');
         $settingsReinstantiated = new LogHeroAPISettings($this->devSettingsFilename);
         static::assertEquals('https://test.loghero.io/logs/', $settingsReinstantiated->getAPILogPackageEndpoint());
+        $settingsReinstantiated->setAPILogPackageEndpoint('https://development.loghero.io/logs/');
+        $this->assertEndpointInDevSettingsFile('https://development.loghero.io/logs/');
+        $settingsReinstantiated = new LogHeroAPISettings($this->devSettingsFilename);
+        static::assertEquals('https://development.loghero.io/logs/', $settingsReinstantiated->getAPILogPackageEndpoint());
     }
 
     public function testHandleParseErrors() {
@@ -49,6 +53,12 @@ class LogHeroAPISettingsTest extends \WP_UnitTestCase {
         file_put_contents($this->devSettingsFilename, '{"apiLogPackageEndpoint": ""}');
         $settings = new LogHeroAPISettings($this->devSettingsFilename);
         static::assertEquals('https://api.loghero.io/logs/', $settings->getAPILogPackageEndpoint());
+    }
+
+    public function testNoDevSettingsFileIfParametersAreNotDefined() {
+        $settings = new LogHeroAPISettings($this->devSettingsFilename);
+        $settings->setAPILogPackageEndpoint('');
+        static::assertFileNotExists($this->devSettingsFilename);
     }
 
     private function assertEndpointInDevSettingsFile($expectedEndpoint) {

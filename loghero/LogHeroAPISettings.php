@@ -27,6 +27,9 @@ class LogHeroAPISettings extends APISettingsDefault {
     }
 
     private function refreshDevSettingsFile() {
+        if (!$this->devSettingsFileNeedsUpdate()) {
+            return;
+        }
         $jsonData = array(
             'apiLogPackageEndpoint' => $this->apiLogPackageEndpoint
         );
@@ -46,5 +49,13 @@ class LogHeroAPISettings extends APISettingsDefault {
         if (array_key_exists('apiLogPackageEndpoint', $json)) {
             $this->apiLogPackageEndpoint = $json['apiLogPackageEndpoint'];
         }
+    }
+
+    private function devSettingsFileNeedsUpdate() {
+        return $this->hasCustomSettings() or file_exists($this->apiDevSettingsFile);
+    }
+
+    private function hasCustomSettings() {
+        return (bool)$this->apiLogPackageEndpoint;
     }
 }
