@@ -178,7 +178,7 @@ class LogHeroPluginTest extends \WP_UnitTestCase {
     }
 
     public function testRefreshAPIKeyFromDbIfKeyUndefined() {
-        LogHeroPluginClient::refreshAPIKey(null);
+        LogHeroGlobals::Instance()->refreshAPIKey(null);
         $plugin = new LogHero_PluginTestImpl($this->apiAccessStub);
         $this->setupServerGlobal('/page-url');
         $this->apiAccessStub
@@ -202,7 +202,7 @@ class LogHeroPluginTest extends \WP_UnitTestCase {
 
     public function testInitializeEmptyPluginFromScratch() {
         update_option('api_key', null);
-        LogHeroPluginClient::refreshAPIKey(null);
+        LogHeroGlobals::Instance()->refreshAPIKey(null);
         new LogHero_PluginTestImpl();
     }
 

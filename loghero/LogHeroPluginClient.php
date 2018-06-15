@@ -43,9 +43,4 @@ class LogHeroPluginClient {
         }
         $this->logTransport->dumpLogEvents();
     }
-
-    public static function refreshAPIKey($apiKey) {
-        $apiKeyStorage = new APIKeyFileStorage(LogHeroGlobals::Instance()->getAPIKeyStorageFilename());
-        $apiKeyStorage->setKey($apiKey);
-    }
 }

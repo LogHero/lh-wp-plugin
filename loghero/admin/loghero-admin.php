@@ -52,7 +52,7 @@ function loghero_admin_init() {
 
 function loghero_api_key_input_renderer() {
     $apiKeyFromDb = get_option('api_key');
-    \LogHero\Wordpress\LogHeroPluginClient::refreshAPIKey($apiKeyFromDb);
+    \LogHero\Wordpress\LogHeroGlobals::Instance()->refreshAPIKey($apiKeyFromDb);
     ?>
     <input type="text" name="api_key" id="api_key" value="<?php echo $apiKeyFromDb; ?>" />
     <?php
