@@ -45,6 +45,12 @@ class LogHeroAPISettingsTest extends \WP_UnitTestCase {
         static::assertEquals('https://api.loghero.io/logs/', $settings->getAPILogPackageEndpoint());
     }
 
+    public function testUseDefaultIfDevSettingsEmpty() {
+        file_put_contents($this->devSettingsFilename, '{"apiLogPackageEndpoint": ""}');
+        $settings = new LogHeroAPISettings($this->devSettingsFilename);
+        static::assertEquals('https://api.loghero.io/logs/', $settings->getAPILogPackageEndpoint());
+    }
+
     private function assertEndpointInDevSettingsFile($expectedEndpoint) {
         $jsonString = file_get_contents($this->devSettingsFilename);
         $json = json_decode($jsonString, true);

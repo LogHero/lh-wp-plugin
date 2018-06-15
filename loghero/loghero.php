@@ -63,10 +63,8 @@ if (!class_exists( 'LogHeroClient_Plugin')) {
 
         public static function refreshAPISettings() {
             $apiEndpointFromDb = get_option('api_endpoint');
-            if ($apiEndpointFromDb) {
-                $apiSettings = new \LogHero\Wordpress\LogHeroAPISettings();
-                $apiSettings->setAPILogPackageEndpoint($apiEndpointFromDb);
-            }
+            $apiSettings = new \LogHero\Wordpress\LogHeroAPISettings();
+            $apiSettings->setAPILogPackageEndpoint($apiEndpointFromDb);
         }
 
         protected function flushEndpoint() {
