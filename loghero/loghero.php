@@ -47,7 +47,7 @@ if (!class_exists( 'LogHeroClient_Plugin')) {
             catch (APIKeyUndefinedException $e) {
                 $apiKeyFromDb = get_option('api_key');
                 if ($apiKeyFromDb) {
-                    LogHeroGlobals::Instance()->refreshAPIKey(get_option('api_key'));
+                    LogHeroGlobals::Instance()->refreshAPIKey($apiKeyFromDb);
                     $this->initialize();
                 }
                 self::refreshAPISettings();

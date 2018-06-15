@@ -64,7 +64,6 @@ function loghero_dev_admin_add_page() {
 
 
 function loghero_api_endpoint_input_renderer() {
-    \LogHero\Wordpress\LogHero_Plugin::refreshAPISettings();
     ?>
     <input type="text" name="api_endpoint" id="api_endpoint" value="<?php echo get_option('api_endpoint'); ?>" />
     <?php
