@@ -7,6 +7,7 @@ use LogHero\Client\APISettingsInterface;
 use \LogHero\Client\LogEventFactory;
 use \LogHero\Client\FileLogBuffer;
 use \LogHero\Client\AsyncLogTransport;
+use \LogHero\Client\AsyncFlushFailedException;
 
 
 class LogHeroPluginClient {
@@ -30,11 +31,19 @@ class LogHeroPluginClient {
     }
 
     public function submitLogEvent() {
-        $logEvent = $this->logEventFactory->create();
-        if ($logEvent->getUserAgent() === LogHeroGlobals::Instance()->getClientId()) {
-            return;
+        try {
+            $logEvent = $this->logEventFactory->create();
+            if ($logEvent->getUserAgent() === LogHeroGlobals::Instance()->getClientId()) {
+                return;
+            }
+            $this->logTransport->submit($logEvent);
         }
-        $this->logTransport->submit($logEvent);
+        // TODO Test this!!
+        catch(AsyncFlushFailedException $e) {
+            $errorFilename = LogHeroGlobals::Instance()->getErrorFilename('async-flush');
+            file_put_contents($errorFilename, $e);
+            chmod($errorFilename, 0666);
+        }
     }
 
     public function flush($token) {

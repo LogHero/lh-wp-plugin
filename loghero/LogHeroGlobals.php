@@ -7,12 +7,13 @@ use \LogHero\Client\APIKeyFileStorage;
 class LogHeroGlobals {
     private $logEventsBufferFile;
     private $apiKeyStorageFile;
-    private $apiSettings;
+    private $errorFilePrefix;
     private static $Instance;
 
     private function __construct() {
         $this->logEventsBufferFile = __DIR__ . '/logs/buffer.loghero.io.txt';
         $this->apiKeyStorageFile = __DIR__ . '/logs/key.loghero.io.txt';
+        $this->errorFilePrefix = __DIR__ . '/logs/errors.loghero.io';
     }
 
     public static function Instance() {
@@ -45,5 +46,9 @@ class LogHeroGlobals {
     public function refreshAPIKey($apiKey) {
         $apiKeyStorage = new APIKeyFileStorage($this->getAPIKeyStorageFilename());
         $apiKeyStorage->setKey($apiKey);
+    }
+
+    public function getErrorFilename($errorTypeId) {
+        return $this->errorFilePrefix . '.' . $errorTypeId . '.txt';
     }
 }

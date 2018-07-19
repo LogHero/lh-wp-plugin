@@ -82,6 +82,14 @@ function setup_api_key_admin_notice(){
                  <p>Your LogHero API key is not setup. Please go to the <a href="/wp-admin/options-general.php?page=loghero">LogHero settings page</a> and enter the API key retrieved from <a target="_blank" href="https://log-hero.com">log-hero.com</a>.</p>
              </div>';
     }
+    // TODO: Put this in a function and add test case
+    $asyncFlushErrorFile = LogHero\Wordpress\LogHeroGlobals::Instance()->getErrorFilename('async-flush');
+    if (file_exists($asyncFlushErrorFile)) {
+        $errorMessage = fgets(fopen($asyncFlushErrorFile, 'r'));
+        echo '<div class="notice notice-warning is-dismissible">
+                 <p>LogHero asynchronous flush failed! This is most likely caused by your server configuration which might block requests made from your backend. The log events are currently flushed synchronously. For more information visit <a target="_blank" href="https://log-hero.com/issues/async-flush-failed">log-hero.com/issues/async-flush-failed</a>.</p><p> Error message: ' . $errorMessage . '</p>
+             </div>';
+    }
 }
 add_action('admin_notices', 'setup_api_key_admin_notice');
 
