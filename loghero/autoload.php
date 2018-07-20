@@ -11,7 +11,8 @@ spl_autoload_register(
                 'loghero\\wordpress\\loghero_plugin' => '/loghero.php',
                 'loghero\\wordpress\\logheropluginclient' => '/LogHeroPluginClient.php',
                 'loghero\\wordpress\\logheroglobals' => '/LogHeroGlobals.php',
-                'loghero\\wordpress\\logheroapisettings' => '/LogHeroAPISettings.php'
+                'loghero\\wordpress\\logheroapisettings' => '/LogHeroAPISettings.php',
+                'loghero\\wordpress\\logheroerrors' => '/LogHeroErrors.php'
             );
         }
         $cn = strtolower($class);

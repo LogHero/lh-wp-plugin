@@ -13,6 +13,7 @@ use \LogHero\Client\AsyncFlushFailedException;
 class LogHeroPluginClient {
     private $apiKeyStorage;
     private $logEventFactory;
+    protected $logTransport;
 
     public function __construct(APISettingsInterface $apiSettings, $flushEndpoint = null, $apiAccess = null) {
         $clientId = LogHeroGlobals::Instance()->getClientId();
@@ -38,11 +39,8 @@ class LogHeroPluginClient {
             }
             $this->logTransport->submit($logEvent);
         }
-        // TODO Test this!!
         catch(AsyncFlushFailedException $e) {
-            $errorFilename = LogHeroGlobals::Instance()->getErrorFilename('async-flush');
-            file_put_contents($errorFilename, $e);
-            chmod($errorFilename, 0666);
+            LogHeroGlobals::Instance()->errors()->writeError('async-flush', $e);
         }
     }
 
