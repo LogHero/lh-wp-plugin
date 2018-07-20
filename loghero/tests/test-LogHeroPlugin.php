@@ -3,9 +3,9 @@ namespace LogHero\Wordpress\Test;
 use \LogHero\Client\APIAccessInterface;
 use \LogHero\Client\APISettingsInterface;
 use \LogHero\Client\LogTransportInterface;
-use \LogHero\Client\AsyncLogTransport;
 use \LogHero\Client\AsyncFlushFailedException;
 use \LogHero\Client\APIKeyMemStorage;
+use \LogHero\Client\FileLogBuffer;
 use \LogHero\Wordpress\LogHeroGlobals;
 use \LogHero\Wordpress\LogHeroAPISettings;
 use \LogHero\Wordpress\LogHeroPluginClient;
@@ -68,6 +68,7 @@ class LogHeroPluginTest extends \WP_UnitTestCase {
     public function setUp() {
         parent::setUp();
         update_option('api_key', $this->apiKey);
+        update_option('use_sync_transport', false);
         $this->bufferFileLocation = __DIR__ . '/logs/buffer.loghero.io.txt';
         $this->apiKeyFileLocation = __DIR__ . '/logs/key.loghero.io.txt';
         $errorFilePrefix = __DIR__ . '/logs/errors.loghero.io';
@@ -192,6 +193,18 @@ class LogHeroPluginTest extends \WP_UnitTestCase {
         $this->plugin->onAsyncFlushAction($this->apiKey);
     }
 
+    public function testUseSyncTransportIfConfigured() {
+        $this->setupServerGlobal('/page-url');
+        $this->fillUpFileLogBuffer();
+        update_option('use_sync_transport', true);
+        $plugin = new LogHero_PluginTestImpl($this->apiAccessStub);
+        $this->apiAccessStub
+            ->expects(static::once())
+            ->method('submitLogPackage');
+
+        $plugin->onShutdownAction();
+    }
+
     public function testWriteAsyncFlushFailuresToErrorFile() {
         $logTransport = $this->getMockBuilder(LogTransportInterface::class)->getMock();
         $logTransport->method('submit')
@@ -278,6 +291,13 @@ class LogHeroPluginTest extends \WP_UnitTestCase {
         $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
         $_SERVER['HTTP_REFERER'] = 'https://www.loghero.io';
         http_response_code(301);
+    }
+
+    private function fillUpFileLogBuffer() {
+        $fileLogBuffer = new FileLogBuffer($this->bufferFileLocation);
+        while($fileLogBuffer->needsDumping() == false) {
+            $fileLogBuffer->push(\LogHero\Client\Test\createLogEvent('/some-path'));
+        }
     }
 
 }
