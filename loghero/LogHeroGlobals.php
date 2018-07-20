@@ -2,7 +2,7 @@
 
 namespace LogHero\Wordpress;
 use \LogHero\Client\APIKeyFileStorage;
-use \LogHero\Wordpress\LogHeroErrors;
+use \LogHero\Client\LogHeroErrors;
 
 
 class LogHeroGlobals {

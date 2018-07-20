@@ -1,4 +1,7 @@
 <?php
+namespace LogHero\Wordpress;
+use \LogHero\Wordpress\LogHero_Plugin;
+use \LogHero\Wordpress\LogHeroGlobals;
 
 
 class LogHeroAdmin {
@@ -8,9 +11,9 @@ class LogHeroAdmin {
     public static $useSyncTransportOptionLabel = 'Disable Async Mode';
 
     public static function setup() {
-        add_action('admin_menu', 'LogHeroAdmin::addLogHeroAdminPage');
-        add_action('admin_init', 'LogHeroAdmin::initAdmin');
-        add_action('admin_notices', 'LogHeroAdmin::setupAdminNotices');
+        add_action('admin_menu', '\LogHero\Wordpress\LogHeroAdmin::addLogHeroAdminPage');
+        add_action('admin_init', '\LogHero\Wordpress\LogHeroAdmin::initAdmin');
+        add_action('admin_notices', '\LogHero\Wordpress\LogHeroAdmin::setupAdminNotices');
         static::flushSettingsToFiles();
     }
 
@@ -20,7 +23,7 @@ class LogHeroAdmin {
             'LogHero',
             'manage_options',
             static::$settingsGroup,
-            'LogHeroAdmin::createLogHeroOptionsPage'
+            '\LogHero\Wordpress\LogHeroAdmin::createLogHeroOptionsPage'
         );
     }
 
@@ -53,7 +56,6 @@ class LogHeroAdmin {
         <?php
     }
 
-
     public static function addBasicSection() {
         $settingsSection = 'loghero_basic';
         add_settings_section(
@@ -65,7 +67,7 @@ class LogHeroAdmin {
         static::addFieldToSection(
             static::$apiKeyOptionName,
             'LogHero API Key (required)',
-            'LogHeroAdmin::apiKeyInputRenderer',
+            '\LogHero\Wordpress\LogHeroAdmin::apiKeyInputRenderer',
             static::$settingsGroup,
             $settingsSection
         );
@@ -82,7 +84,7 @@ class LogHeroAdmin {
         static::addFieldToSection(
             static::$useSyncTransportOptionName,
             static::$useSyncTransportOptionLabel,
-            'LogHeroAdmin::useSyncTransportInputRenderer',
+            '\LogHero\Wordpress\LogHeroAdmin::useSyncTransportInputRenderer',
             static::$settingsGroup,
             $settingsSection
         );
@@ -108,8 +110,8 @@ class LogHeroAdmin {
     public static function useSyncTransportInputRenderer() {
         ?>
         <input name="use_sync_transport" id="use_sync_transport" type="checkbox" value="1" class="code" <?php echo checked( 1, get_option( static::$useSyncTransportOptionName ), false ) ?> />
-        If checked, the log events are sent synchronously to the LogHero API.
-        Enable this option only if you are having trouble with the async mode.
+        If enabled, the log events are sent synchronously to the LogHero API.
+        Use this option only if you are having trouble with the async mode.
         <?php
     }
 
@@ -120,7 +122,7 @@ class LogHeroAdmin {
                  <p>Your LogHero API key is not setup. Please go to the <a href="/wp-admin/options-general.php?page=loghero">LogHero settings page</a> and enter the API key retrieved from <a target="_blank" href="https://log-hero.com">log-hero.com</a>.</p>
              </div>';
         }
-        $asyncFlushError = LogHero\Wordpress\LogHeroGlobals::Instance()->errors()->getError('async-flush');
+        $asyncFlushError = LogHeroGlobals::Instance()->errors()->getError('async-flush');
         if ($asyncFlushError) {
             echo '<div class="notice notice-warning is-dismissible">
                  <p>LogHero asynchronous flush failed! This is most likely caused by your server configuration which might block requests made from your backend.
@@ -133,8 +135,12 @@ class LogHeroAdmin {
     }
 
     private static function flushSettingsToFiles() {
-        \LogHero\Wordpress\LogHero_Plugin::refreshAPISettings();
-        \LogHero\Wordpress\LogHeroGlobals::Instance()->refreshAPIKey(get_option(static::$apiKeyOptionName));
+        LogHero_Plugin::refreshAPISettings();
+        LogHeroGlobals::Instance()->refreshAPIKey(get_option(static::$apiKeyOptionName));
+        $useSyncTransport = get_option(static::$useSyncTransportOptionName);
+        if ($useSyncTransport) {
+            LogHeroGlobals::Instance()->errors()->resolveError('async-flush');
+        }
     }
 
 }
