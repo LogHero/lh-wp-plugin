@@ -54,6 +54,9 @@ class LogHeroPluginClient {
         catch(AsyncFlushFailedException $e) {
             LogHeroGlobals::Instance()->errors()->writeError('async-flush', $e);
         }
+        catch(\Exception $e) {
+            LogHeroGlobals::Instance()->errors()->writeError('unexpected', $e);
+        }
     }
 
     public function flush($token) {
