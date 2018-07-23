@@ -1,5 +1,7 @@
 <?php
-namespace LogHero\Wordpress;
+namespace LogHero\Wordpress\Test;
+use \LogHero\Wordpress\LogHeroAPISettings;
+
 
 class LogHeroAPISettingsTest extends \WP_UnitTestCase {
     private $devSettingsFilename;
