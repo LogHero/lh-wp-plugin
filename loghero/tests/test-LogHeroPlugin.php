@@ -4,6 +4,7 @@ use \LogHero\Client\APIAccessInterface;
 use \LogHero\Client\APISettingsInterface;
 use \LogHero\Client\LogTransportInterface;
 use \LogHero\Client\AsyncFlushFailedException;
+use \LogHero\Client\BufferSizeExceededException;
 use \LogHero\Client\APIKeyMemStorage;
 use \LogHero\Client\FileLogBuffer;
 use \LogHero\Wordpress\LogHeroGlobals;
@@ -64,6 +65,7 @@ class LogHeroPluginTest extends \WP_UnitTestCase {
     private $bufferFileLocation;
     private $apiKeyFileLocation;
     private $asyncErrorsFilename;
+    private $unexpectedErrorsFilename;
 
     public function setUp() {
         parent::setUp();
@@ -73,6 +75,7 @@ class LogHeroPluginTest extends \WP_UnitTestCase {
         $this->apiKeyFileLocation = __DIR__ . '/logs/key.loghero.io.txt';
         $errorFilePrefix = __DIR__ . '/logs/errors.loghero.io';
         $this->asyncErrorsFilename = $errorFilePrefix . '.async-flush.txt';
+        $this->unexpectedErrorsFilename = $errorFilePrefix . '.unexpected.txt';
         LogHeroGlobals::Instance()->setLogEventsBufferFilename($this->bufferFileLocation);
         LogHeroGlobals::Instance()->setAPIKeyStorageFilename($this->apiKeyFileLocation);
         LogHeroGlobals::Instance()->errors()->setErrorFilenamePrefix($errorFilePrefix);
@@ -92,6 +95,9 @@ class LogHeroPluginTest extends \WP_UnitTestCase {
         }
         if(file_exists($this->asyncErrorsFilename)) {
             unlink($this->asyncErrorsFilename);
+        }
+        if(file_exists($this->unexpectedErrorsFilename)) {
+            unlink($this->unexpectedErrorsFilename);
         }
     }
 
@@ -203,6 +209,20 @@ class LogHeroPluginTest extends \WP_UnitTestCase {
             ->method('submitLogPackage');
 
         $plugin->onShutdownAction();
+    }
+
+    public function testWriteUnexpectedFailuresToErrorFile() {
+        $logTransport = $this->getMockBuilder(LogTransportInterface::class)->getMock();
+        $logTransport->method('submit')
+            ->will($this->throwException(new \Exception("Some unexpected error occurred!\n STACK TRACE")));
+        $this->plugin->logHeroTestClient->setCustomLogTransport($logTransport);
+        $this->setupServerGlobal('/page-url');
+        $this->plugin->onShutdownAction();
+        static::assertFileExists($this->unexpectedErrorsFilename);
+        static::assertEquals(
+            "Exception: Some unexpected error occurred!\n",
+            LogHeroGlobals::Instance()->errors()->getError('unexpected')
+        );
     }
 
     public function testWriteAsyncFlushFailuresToErrorFile() {

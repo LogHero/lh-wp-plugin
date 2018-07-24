@@ -129,7 +129,14 @@ class LogHeroAdmin {
                  The log events are currently flushed synchronously.
                  To suppress this warning, either update your server configuration or go to the <a href="/wp-admin/options-general.php?page=loghero">LogHero settings page</a> and activate the "' . static::$useSyncTransportOptionLabel . '" option.
                  For more information visit <a target="_blank" href="https://log-hero.com/issues/async-flush-failed">log-hero.com/issues/async-flush-failed</a>.</p>
-                 <p> Error message: ' . $asyncFlushError . '</p>
+                 <p>Error message: ' . $asyncFlushError . '</p>
+             </div>';
+        }
+        $unexpectedError = LogHeroGlobals::Instance()->errors()->getError('unexpected');
+        if ($unexpectedError) {
+            echo '<div class="notice notice-warning is-dismissible">
+                 <p>Your LogHero plugin does not work propery!</p>
+                 <p>Error message: ' . $unexpectedError . '</p>
              </div>';
         }
     }
