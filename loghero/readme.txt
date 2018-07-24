@@ -101,11 +101,17 @@ You'll find answers to many of your questions on [log-hero.com](https://log-hero
 
 == Changelog ==
 
-First Version of this Plugin
+=== [0.2.1] ===
+==== Added ====
+* Workaround for sites using Cloudflare
+* Admin warnings in case of unexpected errors
+* Protection from running out of disk space in case the flush fails
+* Option to switch from asynchronous mode to synchronous mode
 
 == Upgrade Notice ==
 
-First Version of this Plugin
+=== [0.2.1] ===
+Added workaround for sites using Cloudflare, improved error handling and reporting.
 
 == Screenshots ==
 
