@@ -110,7 +110,7 @@ class LogHeroAdmin {
     public static function useSyncTransportInputRenderer() {
         ?>
         <input name="use_sync_transport" id="use_sync_transport" type="checkbox" value="1" class="code" <?php echo checked( 1, get_option( static::$useSyncTransportOptionName ), false ) ?> />
-        If enabled, the log events are sent synchronously to the LogHero API.
+        If enabled, log events are sent synchronously to the LogHero API.
         Use this option only if you are having trouble with the async mode.
         <?php
     }
