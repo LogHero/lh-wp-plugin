@@ -4,7 +4,6 @@ use \LogHero\Client\APIAccessInterface;
 use \LogHero\Client\APISettingsInterface;
 use \LogHero\Client\LogTransportInterface;
 use \LogHero\Client\AsyncFlushFailedException;
-use \LogHero\Client\BufferSizeExceededException;
 use \LogHero\Client\APIKeyMemStorage;
 use \LogHero\Client\FileLogBuffer;
 use \LogHero\Wordpress\LogHeroGlobals;
