@@ -105,7 +105,7 @@ You'll find answers to many of your questions on [log-hero.com](https://log-hero
 ==== Added ====
 * Workaround for sites using Cloudflare
 * Admin warnings in case of unexpected errors
-* Protection from running out of disk space in case the flush fails
+* Protection from running out of disk space in case of flush errors
 * Option to switch from asynchronous mode to synchronous mode
 
 == Upgrade Notice ==
