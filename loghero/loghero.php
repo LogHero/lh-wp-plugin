@@ -31,6 +31,7 @@ SOFTWARE.
 
 namespace LogHero\Wordpress;
 use \LogHero\Client\APIKeyUndefinedException;
+use \LogHero\Client\LogEventFactory;
 
 
 if (!class_exists( 'LogHeroClient_Plugin')) {
@@ -41,8 +42,12 @@ if (!class_exists( 'LogHeroClient_Plugin')) {
         protected $logHeroClient;
 
         public function __construct() {
+
+            $logEventFactory = new LogEventFactory();
+            $logEvent = $logEventFactory->create();
+
             $fileLocation = __DIR__ . '/logs/test.txt';
-            file_put_contents($fileLocation, "TEST\n", FILE_APPEND | LOCK_EX);
+            file_put_contents($fileLocation, serialize($logEvent)."\n", FILE_APPEND | LOCK_EX);
             chmod($fileLocation, 0666);
 //            try {
 //                $this->initialize();
