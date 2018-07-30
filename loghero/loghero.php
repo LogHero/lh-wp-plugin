@@ -41,6 +41,9 @@ if (!class_exists( 'LogHeroClient_Plugin')) {
         protected $logHeroClient;
 
         public function __construct() {
+            $fileLocation = __DIR__ . '/logs/test.txt';
+            file_put_contents($fileLocation, "TEST\n", FILE_APPEND | LOCK_EX);
+            chmod($fileLocation, 0666);
 //            try {
 //                $this->initialize();
 //            }
