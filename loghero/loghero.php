@@ -41,17 +41,17 @@ if (!class_exists( 'LogHeroClient_Plugin')) {
         protected $logHeroClient;
 
         public function __construct() {
-            try {
-                $this->initialize();
-            }
-            catch (APIKeyUndefinedException $e) {
-                $apiKeyFromDb = get_option('api_key');
-                if ($apiKeyFromDb) {
-                    LogHeroGlobals::Instance()->refreshAPIKey($apiKeyFromDb);
-                    $this->initialize();
-                }
-                self::refreshAPISettings();
-            }
+//            try {
+//                $this->initialize();
+//            }
+//            catch (APIKeyUndefinedException $e) {
+//                $apiKeyFromDb = get_option('api_key');
+//                if ($apiKeyFromDb) {
+//                    LogHeroGlobals::Instance()->refreshAPIKey($apiKeyFromDb);
+//                    $this->initialize();
+//                }
+//                self::refreshAPISettings();
+//            }
         }
 
         public static function getInstance() {
@@ -82,7 +82,7 @@ if (!class_exists( 'LogHeroClient_Plugin')) {
 
     LogHero_Plugin::getInstance();
 
-    if (is_admin()) {
-        require_once(__DIR__ . '/admin/loghero-admin.php');
-    }
+//    if (is_admin()) {
+//        require_once(__DIR__ . '/admin/loghero-admin.php');
+//    }
 }
