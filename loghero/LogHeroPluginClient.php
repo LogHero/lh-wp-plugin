@@ -25,22 +25,26 @@ class LogHeroPluginClient {
             $apiAccess = new APIAccess($this->apiKeyStorage, $clientId, $apiSettings);
         }
         $this->logEventFactory = new LogEventFactory();
-        $logTransportType = LogHeroPluginSettings::getTransportType();
-        if ($logTransportType == LogTransportType::Sync) {
-            $this->logTransport = new LogTransport(
-                new FileLogBuffer(LogHeroGlobals::Instance()->getLogEventsBufferFilename()),
-                $apiAccess
-            );
-        }
-        else {
-            $this->logTransport = new AsyncLogTransport(
-                new FileLogBuffer(LogHeroGlobals::Instance()->getLogEventsBufferFilename()),
-                $apiAccess,
-                $clientId,
-                $this->apiKeyStorage->getKey(),
-                $flushEndpoint
-            );
-        }
+//        $logTransportType = LogHeroPluginSettings::getTransportType();
+        $this->logTransport = new LogTransport(
+            new FileLogBuffer(LogHeroGlobals::Instance()->getLogEventsBufferFilename()),
+            $apiAccess
+        );
+//        if ($logTransportType == LogTransportType::Sync) {
+//            $this->logTransport = new LogTransport(
+//                new FileLogBuffer(LogHeroGlobals::Instance()->getLogEventsBufferFilename()),
+//                $apiAccess
+//            );
+//        }
+//        else {
+//            $this->logTransport = new AsyncLogTransport(
+//                new FileLogBuffer(LogHeroGlobals::Instance()->getLogEventsBufferFilename()),
+//                $apiAccess,
+//                $clientId,
+//                $this->apiKeyStorage->getKey(),
+//                $flushEndpoint
+//            );
+//        }
     }
 
     public function submitLogEvent() {
