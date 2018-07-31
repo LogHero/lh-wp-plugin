@@ -1,3 +1,7 @@
+## Usage
+
+Please refer to https://wordpress.org/plugins/loghero/.
+
 ## Setup Test Environment
 
 Install [VirtualBox](https://www.virtualbox.org/), [Vagrant](https://www.vagrantup.com/) and [Ansible](http://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html).

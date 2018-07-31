@@ -6,20 +6,20 @@ License URI: https://opensource.org/licenses/MIT
 Tags: SEO, Log Files, Crawlers, Log Analysis, Search Engine Bots, Logs
 Requires at least: 3.6
 Tested up to: 4.9.6
-Stable tag: 0.2.0
+Stable tag: 0.2.1
 Requires PHP: 5.2.4
 
 Analyze how search engines and other bots crawl and understand your web page. The official PHP Wordpress plugin for [log-hero.com](https://log-hero.com).
 
 == Description ==
 
-### Log-Hero.com
+= Log-Hero.com =
 
 Do you want to understand how bots crawl your website? Log Hero helps you track and visualize bots, spiders, and crawlers by making them visible in real time in your Google Analytics account so that you can analyze them like human visitors.
 
 His additional dimensions and metrics help you analyze the bot data even better. Using Log Hero, you won't have to fetch your server logs and analyze them in a lousy UI. From now on, your logs are available in real-time in Google Analytics.
 
-#### Data that you can monitor in Google Analytics
+= Data that you can monitor in Google Analytics =
 
 * Page path of your crawled sites (see how often a bot crawls sites).
 * User agent (how the bot identifies himself).
@@ -38,7 +38,7 @@ His additional dimensions and metrics help you analyze the bot data even better.
 
 > Note: some of those features are premium features. They are only available in paid plans. You can [get them here](https://log-hero.com)!
 
-#### Analysis in Google Analytics
+= Analysis in Google Analytics =
 
 All data is safely stored in your Google Analytics account and available even if you won't continue using Log Hero.
 
@@ -49,7 +49,7 @@ All data is safely stored in your Google Analytics account and available even if
 * Analysis of large data sets through Google Analytics' API.
 * Easy setup of dashboards and alerts.
 
-#### Monitoring critical technical issues
+= Monitoring critical technical issues =
 
 Log Hero helps you to identify many issues concerning technical optimization of your site and can derive quick action items to resolve these.
 
@@ -62,32 +62,31 @@ Log Hero helps you to identify many issues concerning technical optimization of 
 * How many users does my normal Google Analytics system not track because they have disabled the tracker or Javascript?
 * and much more. Visit [log-hero.com](https://log-hero.com)! for more information
 
-### Bug reports
+== Bug reports ==
 
 Bug reports for Log Hero are [appreciated on GitHub](https://github.com/LogHero/lh-wp-plugin/issues). Please note that GitHub is not a support forum, and issues that aren't adequately qualified as bugs are closed.
 
-### Further Reading
+== Further Reading ==
 
-For more information about logs or this plugin, visit:
-* The [Log-Hero](https://log-hero.com) homepage.
+For more information about logs or this plugin, visit the [Log-Hero](https://log-hero.com) homepage.
 
 
 == Installation ==
 
-=== From within WordPress ===
+= From within WordPress =
 
 1. Visit 'Plugins > Add New'.
 2. Search for 'Log Hero'.
 3. Activate Log Hero in your plugins page.
 4. Follow the steps on "after activation" below.
 
-=== Manually ===
+= Manually =
 
 1. Upload the `log-hero` folder to the `/wp-content/plugins/` directory.
 2. Activate the Log Hero plugin through the 'Plugins' menu in WordPress.
 3. Follow the steps on "after activation" below.
 
-=== After activation ===
+= After activation =
 
 1. Click on Settings > LogHero.
 2. Now you have to enter the API key you received in the sign-up flow on [log-hero.com](https://log-hero.com). If you don't have an API key, get one for free on [https://log-hero.com](https://log-hero.com)!
@@ -101,11 +100,17 @@ You'll find answers to many of your questions on [log-hero.com](https://log-hero
 
 == Changelog ==
 
-First Version of this Plugin
+= [0.2.1] =
+= Added =
+* Workaround for sites using Cloudflare
+* Admin warnings in case of unexpected errors
+* Protection from running out of disk space in case of flush errors
+* Option to switch from asynchronous mode to synchronous mode
 
 == Upgrade Notice ==
 
-First Version of this Plugin
+= [0.2.1] =
+Added workaround for sites using Cloudflare, improved error handling and reporting.
 
 == Screenshots ==
 
