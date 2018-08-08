@@ -31,6 +31,7 @@ SOFTWARE.
 
 namespace LogHero\Wordpress;
 use \LogHero\Client\APIKeyUndefinedException;
+use LogHero\Client\PermissionDeniedException;
 
 
 if (!class_exists( 'LogHeroClient_Plugin')) {
@@ -51,6 +52,8 @@ if (!class_exists( 'LogHeroClient_Plugin')) {
                     $this->initialize();
                 }
                 self::refreshAPISettings();
+            }
+            catch (PermissionDeniedException $e) {
             }
         }
 

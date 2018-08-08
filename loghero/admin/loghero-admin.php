@@ -2,6 +2,7 @@
 namespace LogHero\Wordpress;
 use \LogHero\Wordpress\LogHero_Plugin;
 use \LogHero\Wordpress\LogHeroGlobals;
+use \LogHero\Client\PermissionDeniedException;
 
 
 class LogHeroAdmin {
@@ -122,31 +123,44 @@ class LogHeroAdmin {
                  <p>Your LogHero API key is not setup. Please go to the <a href="/wp-admin/options-general.php?page=loghero">LogHero settings page</a> and enter the API key retrieved from <a target="_blank" href="https://log-hero.com">log-hero.com</a>.</p>
              </div>';
         }
-        $asyncFlushError = LogHeroGlobals::Instance()->errors()->getError('async-flush');
-        if ($asyncFlushError) {
-            echo '<div class="notice notice-warning is-dismissible">
+        try {
+            $asyncFlushError = LogHeroGlobals::Instance()->errors()->getError('async-flush');
+            if ($asyncFlushError) {
+                echo '<div class="notice notice-warning is-dismissible">
                  <p>LogHero asynchronous flush failed! This is most likely caused by your server configuration which might block requests made from your backend.
                  The log events are currently flushed synchronously.
                  To suppress this warning, either update your server configuration or go to the <a href="/wp-admin/options-general.php?page=loghero">LogHero settings page</a> and activate the "' . static::$useSyncTransportOptionLabel . '" option.
-                 For more information visit <a target="_blank" href="https://log-hero.com/issues/async-flush-failed">log-hero.com/issues/async-flush-failed</a>.</p>
+                 For more information visit <a target="_blank" href="https://log-hero.com/docs/asynchronous-flush-failed/">https://log-hero.com/docs/asynchronous-flush-failed/</a>.</p>
                  <p>Error message: ' . $asyncFlushError . '</p>
              </div>';
-        }
-        $unexpectedError = LogHeroGlobals::Instance()->errors()->getError('unexpected');
-        if ($unexpectedError) {
-            echo '<div class="notice notice-warning is-dismissible">
+            }
+            $unexpectedError = LogHeroGlobals::Instance()->errors()->getError('unexpected');
+            if ($unexpectedError) {
+                echo '<div class="notice notice-warning is-dismissible">
                  <p>Your LogHero plugin does not work propery!</p>
                  <p>Error message: ' . $unexpectedError . '</p>
+             </div>';
+            }
+        }
+        catch(PermissionDeniedException $permissionDeniedError) {
+            echo '<div class="notice notice-error is-dismissible">
+                 <p>Your LogHero plugin cannot write to the "logs" folder (permission denied). Please set access rights properly or disable the plugin.
+                 For more information visit <a target="_blank" href="https://log-hero.com/docs/permission-denied">https://log-hero.com/docs/permission-denied</a>.</p>
+                 <p>Error message: ' . $permissionDeniedError->getMessage() . '</p>
              </div>';
         }
     }
 
     private static function flushSettingsToFiles() {
-        LogHero_Plugin::refreshAPISettings();
-        LogHeroGlobals::Instance()->refreshAPIKey(get_option(static::$apiKeyOptionName));
-        $useSyncTransport = get_option(static::$useSyncTransportOptionName);
-        if ($useSyncTransport) {
-            LogHeroGlobals::Instance()->errors()->resolveError('async-flush');
+        try {
+            LogHero_Plugin::refreshAPISettings();
+            LogHeroGlobals::Instance()->refreshAPIKey(get_option(static::$apiKeyOptionName));
+            $useSyncTransport = get_option(static::$useSyncTransportOptionName);
+            if ($useSyncTransport) {
+                LogHeroGlobals::Instance()->errors()->resolveError('async-flush');
+            }
+        }
+        catch(PermissionDeniedException $e) {
         }
     }
 
