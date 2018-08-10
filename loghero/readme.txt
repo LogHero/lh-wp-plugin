@@ -100,6 +100,12 @@ You'll find answers to many of your questions on [log-hero.com](https://log-hero
 
 == Changelog ==
 
+= [0.2.2] =
+= Added =
+* Admin error message if plugin cannot write to log buffer
+* Send protocol version (http or https)
+* Evaluation of IP ranges to improve bot detection
+
 = [0.2.1] =
 = Added =
 * Workaround for sites using Cloudflare
@@ -108,6 +114,9 @@ You'll find answers to many of your questions on [log-hero.com](https://log-hero
 * Option to switch from asynchronous mode to synchronous mode
 
 == Upgrade Notice ==
+
+= [0.2.2] =
+Evaluation of IP ranges to improve bot detection, send protocol version (http or https), improved error handling and reporting.
 
 = [0.2.1] =
 Added workaround for sites using Cloudflare, improved error handling and reporting.
