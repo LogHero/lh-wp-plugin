@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: LogHero Client
-Version:     0.2.1
+Version:     0.2.2
 Description: Analyze how search engines and other bots crawl and understand your web page. The official PHP Wordpress plugin for log-hero.com.
 Author:      Kay Wolter
 Author URI:  https://log-hero.com/
@@ -31,6 +31,7 @@ SOFTWARE.
 
 namespace LogHero\Wordpress;
 use \LogHero\Client\APIKeyUndefinedException;
+use LogHero\Client\PermissionDeniedException;
 
 
 if (!class_exists( 'LogHeroClient_Plugin')) {
@@ -51,6 +52,8 @@ if (!class_exists( 'LogHeroClient_Plugin')) {
                     $this->initialize();
                 }
                 self::refreshAPISettings();
+            }
+            catch (PermissionDeniedException $e) {
             }
         }
 

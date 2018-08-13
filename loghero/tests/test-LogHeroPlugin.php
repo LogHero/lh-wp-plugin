@@ -116,12 +116,14 @@ class LogHeroPluginTest extends \WP_UnitTestCase {
             ->with($this->equalTo($this->buildExpectedPayload([[
                 'd113ff3141723d50fec2933977c89ea6',
                 'example.org',
+                'http',
                 '/page-url',
                 'POST',
                 301,
                 '2018-04-11T06:48:18+00:00',
                 2389,
                 'f528764d624db129b32c21fbca0cb8d6',
+                'ec5decca5ed3d6b8079e2e7e7bacc9f2.cfcd208495d565ef66e7dff9f98764da.cfcd208495d565ef66e7dff9f98764da.c4ca4238a0b923820dcc509a6f75849b',
                 'Firefox',
                 'https://www.loghero.io'
             ]])));
@@ -138,12 +140,14 @@ class LogHeroPluginTest extends \WP_UnitTestCase {
             ->with($this->equalTo($this->buildExpectedPayload([[
                 'd113ff3141723d50fec2933977c89ea6',
                 'example.org',
+                'http',
                 '/page-url',
                 'POST',
                 301,
                 '2018-04-11T06:48:20+00:00',
                 null,
                 'f528764d624db129b32c21fbca0cb8d6',
+                'ec5decca5ed3d6b8079e2e7e7bacc9f2.cfcd208495d565ef66e7dff9f98764da.cfcd208495d565ef66e7dff9f98764da.c4ca4238a0b923820dcc509a6f75849b',
                 'Firefox',
                 'https://www.loghero.io'
             ]])));
@@ -159,24 +163,28 @@ class LogHeroPluginTest extends \WP_UnitTestCase {
                 [
                     'd113ff3141723d50fec2933977c89ea6',
                     'example.org',
+                    'http',
                     '/page-url-1',
                     'POST',
                     301,
                     '2018-04-11T06:48:18+00:00',
                     2389,
                     'f528764d624db129b32c21fbca0cb8d6',
+                    'ec5decca5ed3d6b8079e2e7e7bacc9f2.cfcd208495d565ef66e7dff9f98764da.cfcd208495d565ef66e7dff9f98764da.c4ca4238a0b923820dcc509a6f75849b',
                     'Firefox',
                     'https://www.loghero.io'
                 ],
                 [
                     'd113ff3141723d50fec2933977c89ea6',
                     'example.org',
+                    'http',
                     '/page-url-2',
                     'POST',
                     301,
                     '2018-04-11T06:48:18+00:00',
                     2389,
                     'f528764d624db129b32c21fbca0cb8d6',
+                    'ec5decca5ed3d6b8079e2e7e7bacc9f2.cfcd208495d565ef66e7dff9f98764da.cfcd208495d565ef66e7dff9f98764da.c4ca4238a0b923820dcc509a6f75849b',
                     'Firefox',
                     'https://www.loghero.io'
                 ]
@@ -265,12 +273,14 @@ class LogHeroPluginTest extends \WP_UnitTestCase {
             ->with($this->equalTo($this->buildExpectedPayload([[
                 'd113ff3141723d50fec2933977c89ea6',
                 'example.org',
+                'http',
                 '/page-url',
                 'POST',
                 301,
                 '2018-04-11T06:48:18+00:00',
                 2389,
                 'f528764d624db129b32c21fbca0cb8d6',
+                'ec5decca5ed3d6b8079e2e7e7bacc9f2.cfcd208495d565ef66e7dff9f98764da.cfcd208495d565ef66e7dff9f98764da.c4ca4238a0b923820dcc509a6f75849b',
                 'Firefox',
                 'https://www.loghero.io'
             ]])));
@@ -289,12 +299,14 @@ class LogHeroPluginTest extends \WP_UnitTestCase {
             'columns' => [
                 'cid',
                 'hostname',
+                'protocol',
                 'landingPage',
                 'method',
                 'statusCode',
                 'timestamp',
                 'pageLoadTime',
                 'ip',
+                'ipGroups',
                 'ua',
                 'referer'
             ],

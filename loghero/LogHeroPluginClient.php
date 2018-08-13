@@ -26,7 +26,7 @@ class LogHeroPluginClient {
         }
         $this->logEventFactory = new LogEventFactory();
         $logTransportType = LogHeroPluginSettings::getTransportType();
-        if ($logTransportType == LogTransportType::Sync) {
+        if ($logTransportType == LogTransportType::SYNC) {
             $this->logTransport = new LogTransport(
                 new FileLogBuffer(LogHeroGlobals::Instance()->getLogEventsBufferFilename()),
                 $apiAccess

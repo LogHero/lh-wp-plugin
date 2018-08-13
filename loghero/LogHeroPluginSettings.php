@@ -9,9 +9,9 @@ class LogHeroPluginSettings {
     public static function getTransportType() {
         $useSyncTransport = static::getOption('use_sync_transport');
         if ($useSyncTransport) {
-            return LogTransportType::Sync;
+            return LogTransportType::SYNC;
         }
-        return LogTransportType::Async;
+        return LogTransportType::ASYNC;
     }
 
     public static function getOption($key) {
