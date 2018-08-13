@@ -11,10 +11,10 @@ class LogHeroPluginSettingsTest extends \WP_UnitTestCase {
     }
 
     public function testGetTransportTypeFromOptions() {
-        static::assertEquals(LogTransportType::Async, LogHeroPluginSettings::getTransportType());
+        static::assertEquals(LogTransportType::ASYNC, LogHeroPluginSettings::getTransportType());
         update_option('use_sync_transport', true);
-        static::assertEquals(LogTransportType::Sync, LogHeroPluginSettings::getTransportType());
+        static::assertEquals(LogTransportType::SYNC, LogHeroPluginSettings::getTransportType());
         update_option('use_sync_transport', false);
-        static::assertEquals(LogTransportType::Async, LogHeroPluginSettings::getTransportType());
+        static::assertEquals(LogTransportType::ASYNC, LogHeroPluginSettings::getTransportType());
     }
 }
