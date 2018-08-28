@@ -43,6 +43,7 @@ class LogHeroPluginSettings {
         return $this->redisOptions;
     }
 
+    # TODO: Introduce generic storage strategy for errors and settings (File, Redis, ...)
     public function flushToSettingsStorage() {
         $optionsToStore = static::getOptionsToStore();
         $jsonData = array();

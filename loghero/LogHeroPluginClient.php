@@ -12,6 +12,7 @@ use LogHero\Client\AsyncLogTransport;
 use LogHero\Client\AsyncFlushFailedException;
 use LogHero\Client\LogTransportType;
 use LogHero\Wordpress\LogHeroPluginSettings;
+use Predis\Client;
 
 
 class LogHeroPluginClient {
@@ -73,7 +74,7 @@ class LogHeroPluginClient {
         $redisOptions = $this->settings->getRedisOptions();
         # TODO: This needs testing:
         if ($redisOptions) {
-            return new RedisLogBuffer($redisOptions);
+            return new RedisLogBuffer(new \Predis\Client($redisOptions->getRedisUrl()), $redisOptions);
         }
         return new FileLogBuffer(LogHeroGlobals::Instance()->getLogEventsBufferFilename());
     }
