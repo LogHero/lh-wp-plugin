@@ -8,7 +8,9 @@ use \LogHero\Client\PermissionDeniedException;
 class LogHeroAdmin {
     public static $settingsGroup = 'loghero';
     public static $apiKeyOptionName = 'api_key';
-    public static $useSyncTransportOptionName = 'use_sync_transport';
+    public static $redisUrlOptionName = 'redis_url';
+    public static $redisLogBufferKeyOptionName = 'redis_log_buffer_key';
+
     public static $useSyncTransportOptionLabel = 'Disable Async Mode';
 
     public static function setup() {
@@ -83,9 +85,23 @@ class LogHeroAdmin {
             static::$settingsGroup
         );
         static::addFieldToSection(
-            static::$useSyncTransportOptionName,
+            LogHeroPluginSettings::$useSyncTransportOptionName,
             static::$useSyncTransportOptionLabel,
             '\LogHero\Wordpress\LogHeroAdmin::useSyncTransportInputRenderer',
+            static::$settingsGroup,
+            $settingsSection
+        );
+        static::addFieldToSection(
+            static::$redisUrlOptionName,
+            'Redis URL',
+            '\LogHero\Wordpress\LogHeroAdmin::redisUrlInputRenderer',
+            static::$settingsGroup,
+            $settingsSection
+        );
+        static::addFieldToSection(
+            static::$redisLogBufferKeyOptionName,
+            'Redis Log Buffer Key',
+            '\LogHero\Wordpress\LogHeroAdmin::redisLogBufferKeyInputRenderer',
             static::$settingsGroup,
             $settingsSection
         );
@@ -108,9 +124,30 @@ class LogHeroAdmin {
         <?php
     }
 
+    public static function redisUrlInputRenderer() {
+        ?>
+        <input type="text" name="redis_url" id="redis_url" value="<?php echo get_option(static::$redisUrlOptionName); ?>" />
+        <p class="description">Use Redis store to buffer log events.</p>
+        <?php
+    }
+
+    public static function redisLogBufferKeyInputRenderer() {
+        ?>
+        <input type="text" name="redis_log_buffer_key" id="redis_log_buffer_key" value="<?php echo get_option(static::$redisLogBufferKeyOptionName); ?>" />
+        <p class="description">Redis key used to store buffered log events (default: "loghero:logs").</p>
+        <?php
+    }
+
     public static function useSyncTransportInputRenderer() {
         ?>
-        <input name="use_sync_transport" id="use_sync_transport" type="checkbox" value="1" class="code" <?php echo checked( 1, get_option( static::$useSyncTransportOptionName ), false ) ?> />
+        <input
+            name="<?php echo LogHeroPluginSettings::$useSyncTransportOptionName ?>"
+            id="<?php echo LogHeroPluginSettings::$useSyncTransportOptionName ?>"
+            type="checkbox"
+            value="1"
+            class="code"
+            <?php echo checked( 1, get_option( LogHeroPluginSettings::$useSyncTransportOptionName ), false ) ?>
+        />
         If enabled, log events are sent synchronously to the LogHero API.
         Use this option only if you are having trouble with the async mode.
         <?php
@@ -153,9 +190,9 @@ class LogHeroAdmin {
 
     private static function flushSettingsToFiles() {
         try {
-            LogHero_Plugin::refreshAPISettings();
+            LogHero_Plugin::refreshPluginSettings();
             LogHeroGlobals::Instance()->refreshAPIKey(get_option(static::$apiKeyOptionName));
-            $useSyncTransport = get_option(static::$useSyncTransportOptionName);
+            $useSyncTransport = get_option(LogHeroPluginSettings::$useSyncTransportOptionName);
             if ($useSyncTransport) {
                 LogHeroGlobals::Instance()->errors()->resolveError('async-flush');
             }

@@ -6,6 +6,7 @@ use LogHero\Client\APIAccess;
 use LogHero\Client\APISettingsInterface;
 use LogHero\Client\LogEventFactory;
 use LogHero\Client\FileLogBuffer;
+use LogHero\Client\RedisLogBuffer;
 use LogHero\Client\LogTransport;
 use LogHero\Client\AsyncLogTransport;
 use LogHero\Client\AsyncFlushFailedException;
@@ -24,17 +25,18 @@ class LogHeroPluginClient {
         if (!$apiAccess) {
             $apiAccess = new APIAccess($this->apiKeyStorage, $clientId, $apiSettings);
         }
+        $pluginSettings = new LogHeroPluginSettings();
         $this->logEventFactory = new LogEventFactory();
-        $logTransportType = LogHeroPluginSettings::getTransportType();
+        $logTransportType = $pluginSettings->getTransportType();
         if ($logTransportType == LogTransportType::SYNC) {
             $this->logTransport = new LogTransport(
-                new FileLogBuffer(LogHeroGlobals::Instance()->getLogEventsBufferFilename()),
+                $this->createLogBuffer(),
                 $apiAccess
             );
         }
         else {
             $this->logTransport = new AsyncLogTransport(
-                new FileLogBuffer(LogHeroGlobals::Instance()->getLogEventsBufferFilename()),
+                $this->createLogBuffer(),
                 $apiAccess,
                 $clientId,
                 $this->apiKeyStorage->getKey(),
@@ -64,6 +66,11 @@ class LogHeroPluginClient {
             throw new InvalidTokenException('Token is invalid');
         }
         $this->logTransport->dumpLogEvents();
+    }
+
+    private function createLogBuffer() {
+        //return new RedisLogBuffer();
+        return new FileLogBuffer(LogHeroGlobals::Instance()->getLogEventsBufferFilename());
     }
 
 }
