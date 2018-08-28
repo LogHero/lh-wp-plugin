@@ -17,6 +17,7 @@ use LogHero\Wordpress\LogHeroPluginSettings;
 class LogHeroPluginClient {
     private $apiKeyStorage;
     private $logEventFactory;
+    private $settings;
     protected $logTransport;
 
     public function __construct(APISettingsInterface $apiSettings, $flushEndpoint = null, $apiAccess = null) {
@@ -25,9 +26,9 @@ class LogHeroPluginClient {
         if (!$apiAccess) {
             $apiAccess = new APIAccess($this->apiKeyStorage, $clientId, $apiSettings);
         }
-        $pluginSettings = new LogHeroPluginSettings();
+        $this->settings = new LogHeroPluginSettings();
         $this->logEventFactory = new LogEventFactory();
-        $logTransportType = $pluginSettings->getTransportType();
+        $logTransportType = $this->settings->getTransportType();
         if ($logTransportType == LogTransportType::SYNC) {
             $this->logTransport = new LogTransport(
                 $this->createLogBuffer(),
@@ -69,7 +70,11 @@ class LogHeroPluginClient {
     }
 
     private function createLogBuffer() {
-        //return new RedisLogBuffer();
+        $redisOptions = $this->settings->getRedisOptions();
+        # TODO: This needs testing:
+        if ($redisOptions) {
+            return new RedisLogBuffer($redisOptions);
+        }
         return new FileLogBuffer(LogHeroGlobals::Instance()->getLogEventsBufferFilename());
     }
 
