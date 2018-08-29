@@ -11,6 +11,7 @@ class LogHeroPluginSettingsTest extends \WP_UnitTestCase {
 
     public function setUp() {
         update_option(LogHeroPluginSettings::$useSyncTransportOptionName, null);
+        update_option(LogHeroPluginSettings::$disableTransportOptionName, null);
         update_option(LogHeroPluginSettings::$apiKeyOptionName, 'SOME_API_KEY');
         update_option(LogHeroPluginSettings::$redisUrlOptionName, null);
         update_option(LogHeroPluginSettings::$redisKeyPrefixOptionName, null);
@@ -29,6 +30,12 @@ class LogHeroPluginSettingsTest extends \WP_UnitTestCase {
         static::assertEquals(LogTransportType::SYNC, $this->createSettings()->getTransportType());
         update_option(LogHeroPluginSettings::$useSyncTransportOptionName, false);
         static::assertEquals(LogTransportType::ASYNC, $this->createSettings()->getTransportType());
+        update_option(LogHeroPluginSettings::$disableTransportOptionName, true);
+        static::assertEquals(LogTransportType::DISABLED, $this->createSettings()->getTransportType());
+        update_option(LogHeroPluginSettings::$useSyncTransportOptionName, true);
+        static::assertEquals(LogTransportType::DISABLED, $this->createSettings()->getTransportType());
+        update_option(LogHeroPluginSettings::$disableTransportOptionName, false);
+        static::assertEquals(LogTransportType::SYNC, $this->createSettings()->getTransportType());
     }
 
     public function testGetRedisOptions() {

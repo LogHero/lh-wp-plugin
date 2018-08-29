@@ -17,5 +17,10 @@ if(session_id()) {
     session_write_close();
 }
 
-$logHeroClient = new \LogHero\Wordpress\LogHeroPluginClient(new \LogHero\Wordpress\LogHeroAPISettings(), null);
+$logHeroClient = new \LogHero\Wordpress\LogHeroPluginClient(
+    new \LogHero\Wordpress\LogHeroAPISettings(
+        new \LogHero\Wordpress\LogHeroPluginSettings(\LogHero\Wordpress\LogHeroPluginClient::createSettingsStorage())
+    ),
+    null
+);
 $logHeroClient->flush($_SERVER['HTTP_TOKEN']);
