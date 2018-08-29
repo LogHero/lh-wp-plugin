@@ -154,7 +154,7 @@ class LogHeroAdmin {
             id="<?php echo LogHeroPluginSettings::$redisKeyPrefixOptionName ?>"
             value="<?php echo get_option(LogHeroPluginSettings::$redisKeyPrefixOptionName); ?>"
         />
-        <p class="description">Redis key used to store buffered log events (default: "<?php echo RedisOptions::$defaultRedisKeyPredix; ?>").</p>
+        <p class="description">Redis key used to store buffered log events (default: "<?php echo LogHeroPluginSettings::buildDefaultRedisKeyPrefix(get_option(LogHeroPluginSettings::$apiKeyOptionName)); ?>").</p>
         <?php
     }
 

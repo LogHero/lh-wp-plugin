@@ -12,6 +12,7 @@ class LogHeroPluginSettings {
     public static $apiEndpointOptionName = 'api_endpoint';
     public static $useSyncTransportOptionName = 'use_sync_transport';
     public static $disableTransportOptionName = 'disable_transport';
+    public static $defaultRedisKeyPrefix = 'io.loghero:wp';
 
     private $settingsStorage;
     private $hasWordPress;
@@ -71,6 +72,10 @@ class LogHeroPluginSettings {
         return $settings->isAsyncFlushInternally();
     }
 
+    public static function buildDefaultRedisKeyPrefix($apiKey) {
+        return static::$defaultRedisKeyPrefix . ':' . $apiKey;
+    }
+
     private function initializeSettings() {
         $jsonData = null;
         $storageData = $this->settingsStorage ? $this->settingsStorage->get() : null;
@@ -85,6 +90,9 @@ class LogHeroPluginSettings {
         $redisUrl = $this->getOption(static::$redisUrlOptionName, $jsonData);
         if($redisUrl) {
             $redisKeyPrefix = $this->getOption(static::$redisKeyPrefixOptionName, $jsonData);
+            if (!$redisKeyPrefix) {
+                $redisKeyPrefix = static::buildDefaultRedisKeyPrefix($this->apiKey);
+            }
             $this->redisOptions = new RedisOptions($redisUrl, $redisKeyPrefix);
         }
         $this->initializeTransportType($jsonData);
