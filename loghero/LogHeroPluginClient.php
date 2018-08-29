@@ -72,7 +72,6 @@ class LogHeroPluginClient {
 
     private function createLogBuffer() {
         $redisOptions = $this->settings->getRedisOptions();
-        # TODO: This needs testing:
         if ($redisOptions) {
             return new RedisLogBuffer(new \Predis\Client($redisOptions->getRedisUrl()), $redisOptions);
         }
