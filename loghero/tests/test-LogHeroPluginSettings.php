@@ -14,6 +14,7 @@ class LogHeroPluginSettingsTest extends \WP_UnitTestCase {
         update_option(LogHeroPluginSettings::$apiKeyOptionName, 'SOME_API_KEY');
         update_option(LogHeroPluginSettings::$redisUrlOptionName, null);
         update_option(LogHeroPluginSettings::$redisKeyPrefixOptionName, null);
+        update_option(LogHeroPluginSettings::$apiEndpointOptionName, null);
     }
 
     public function tearDown() {
@@ -47,6 +48,14 @@ class LogHeroPluginSettingsTest extends \WP_UnitTestCase {
         );
         update_option(LogHeroPluginSettings::$redisUrlOptionName, '');
         static::assertNull($this->createSettings()->getRedisOptions());
+    }
+
+    public function testGetApiEndpointOptions() {
+        static::assertNull($this->createSettings()->getApiEndpoint());
+        update_option(LogHeroPluginSettings::$apiEndpointOptionName, '');
+        static::assertNull($this->createSettings()->getApiEndpoint());
+        update_option(LogHeroPluginSettings::$apiEndpointOptionName, 'https://my.api.endpoint/logs/');
+        static::assertEquals('https://my.api.endpoint/logs/', $this->createSettings()->getApiEndpoint());
     }
 
     public function testFlushSettingsToStorage() {

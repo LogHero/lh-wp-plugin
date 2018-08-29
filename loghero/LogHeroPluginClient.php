@@ -22,13 +22,13 @@ class LogHeroPluginClient {
     private $settings;
     protected $logTransport;
 
-    public function __construct(APISettingsInterface $apiSettings, $flushEndpoint = null, $apiAccess = null) {
+    public function __construct($flushEndpoint = null, $apiAccess = null) {
         $clientId = LogHeroGlobals::Instance()->getClientId();
         $this->apiKeyStorage = new APIKeyFileStorage(LogHeroGlobals::Instance()->getAPIKeyStorageFilename());
-        if (!$apiAccess) {
-            $apiAccess = new APIAccess($this->apiKeyStorage, $clientId, $apiSettings);
-        }
         $this->settings = new LogHeroPluginSettings(static::createSettingsStorage());
+        if (!$apiAccess) {
+            $apiAccess = new APIAccess($this->apiKeyStorage, $clientId, new LogHeroAPISettings($this->settings));
+        }
         $this->logEventFactory = new LogEventFactory();
         $logTransportType = $this->settings->getTransportType();
         if ($logTransportType == LogTransportType::SYNC) {

@@ -17,8 +17,8 @@ require_once __DIR__ . '/../sdk/test/Util.php';
 
 
 class LogHeroPluginClientTestImpl extends LogHeroPluginClient {
-    public function __construct(APISettingsInterface $apiSettings, $flushEndpoint = null, $apiAccess = null) {
-        parent::__construct($apiSettings, $flushEndpoint, $apiAccess);
+    public function __construct($flushEndpoint = null, $apiAccess = null) {
+        parent::__construct($flushEndpoint, $apiAccess);
     }
 
     public function setCustomLogTransport($logTransport) {
@@ -34,7 +34,6 @@ class LogHero_PluginTestImpl extends LogHero_Plugin {
         parent::__construct();
         if ($apiAccessStub) {
             $this->logHeroTestClient = new LogHeroPluginClientTestImpl(
-                new LogHeroAPISettings(),
                 '/flush.php',
                 $apiAccessStub
             );

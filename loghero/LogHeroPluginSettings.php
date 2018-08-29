@@ -10,6 +10,7 @@ class LogHeroPluginSettings {
     public static $apiKeyOptionName = 'api_key';
     public static $redisUrlOptionName = 'redis_url';
     public static $redisKeyPrefixOptionName = 'redis_key_prefix';
+    public static $apiEndpointOptionName = 'api_endpoint';
 
     private $settingsStorage;
     private $hasWordPress;
@@ -17,6 +18,7 @@ class LogHeroPluginSettings {
     private $apiKey;
     private $transportType;
     private $redisOptions;
+    private $apiEndpoint;
 
     public function __construct($settingsStorage = null, $hasWordPress = null) {
         if ($hasWordPress === null) {
@@ -40,6 +42,10 @@ class LogHeroPluginSettings {
         return $this->redisOptions;
     }
 
+    public function getApiEndpoint() {
+        return $this->apiEndpoint;
+    }
+
     public function flushToSettingsStorage() {
         $optionsToStore = static::getOptionsToStore();
         $jsonData = array();
@@ -56,6 +62,10 @@ class LogHeroPluginSettings {
             $jsonData = json_decode($storageData, true);
         }
         $this->apiKey = $this->getOption(static::$apiKeyOptionName, $jsonData);
+        $apiEndpoint = $this->getOption(static::$apiEndpointOptionName, $jsonData);
+        if ($apiEndpoint) {
+            $this->apiEndpoint = $apiEndpoint;
+        }
         $redisUrl = $this->getOption(static::$redisUrlOptionName, $jsonData);
         if($redisUrl) {
             $redisKeyPrefix = $this->getOption(static::$redisKeyPrefixOptionName, $jsonData);
@@ -84,7 +94,8 @@ class LogHeroPluginSettings {
             static::$useSyncTransportOptionName,
             static::$apiKeyOptionName,
             static::$redisUrlOptionName,
-            static::$redisKeyPrefixOptionName
+            static::$redisKeyPrefixOptionName,
+            static::$apiEndpointOptionName
         );
     }
 
