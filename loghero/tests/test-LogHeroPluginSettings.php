@@ -85,8 +85,25 @@ class LogHeroPluginSettingsTest extends \WP_UnitTestCase {
     public function testIgnoreStorageIfNotProvided() {
         $settingsWithoutStorage = new LogHeroPluginSettings();
         static::assertEquals('SOME_API_KEY', $settingsWithoutStorage->getApiKey());
+        $settingsWithoutStorage->flushToSettingsStorage();
         $settingsWithoutStorageAndWordPress = new LogHeroPluginSettings(null, False);
         static::assertNull($settingsWithoutStorageAndWordPress->getApiKey());
+    }
+
+    public function testSpecifyIfAsyncFlushIsActivated() {
+        static::assertTrue(LogHeroPluginSettings::isAsyncFlush());
+        update_option(LogHeroPluginSettings::$useSyncTransportOptionName, true);
+        static::assertFalse(LogHeroPluginSettings::isAsyncFlush());
+    }
+
+    public function testSpecifyIfAccessToLogsFolderIsRequired() {
+        static::assertTrue(LogHeroPluginSettings::accessToLogsFolderIsRequired());
+        update_option(LogHeroPluginSettings::$useSyncTransportOptionName, true);
+        static::assertTrue(LogHeroPluginSettings::accessToLogsFolderIsRequired());
+        update_option(LogHeroPluginSettings::$redisUrlOptionName, 'REDIS_URL');
+        static::assertFalse(LogHeroPluginSettings::accessToLogsFolderIsRequired());
+        update_option(LogHeroPluginSettings::$useSyncTransportOptionName, false);
+        static::assertTrue(LogHeroPluginSettings::accessToLogsFolderIsRequired());
     }
 
     private function createSettings($hasWordPress = null) {

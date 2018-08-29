@@ -211,7 +211,6 @@ class LogHeroPluginTest extends \WP_UnitTestCase {
         $this->apiAccessStub
             ->expects(static::once())
             ->method('submitLogPackage');
-
         $plugin->onShutdownAction();
     }
 

@@ -52,7 +52,22 @@ class LogHeroPluginSettings {
         foreach($optionsToStore as $option) {
             $jsonData[$option] = get_option($option);
         }
-        $this->settingsStorage->set(json_encode($jsonData));
+        if ($this->settingsStorage) {
+            $this->settingsStorage->set(json_encode($jsonData));
+        }
+    }
+
+    public static function accessToLogsFolderIsRequired() {
+        $settings = new self();
+        if ($settings->isAsyncFlushInternally()) {
+            return true;
+        }
+        return $settings->getRedisOptions() === null;
+    }
+
+    public static function isAsyncFlush() {
+        $settings = new self();
+        return $settings->isAsyncFlushInternally();
     }
 
     private function initializeSettings() {
@@ -87,6 +102,10 @@ class LogHeroPluginSettings {
             return array_key_exists($key, $jsonData) ? $jsonData[$key] : null;
         }
         return null;
+    }
+
+    private function isAsyncFlushInternally() {
+        return $this->getTransportType() === LogTransportType::ASYNC;
     }
 
     private static function getOptionsToStore() {

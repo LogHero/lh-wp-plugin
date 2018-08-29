@@ -5,6 +5,7 @@ use LogHero\Client\APIAccess;
 use LogHero\Client\APISettingsInterface;
 use LogHero\Client\LogEventFactory;
 use LogHero\Client\FileLogBuffer;
+use LogHero\Client\PermissionDeniedException;
 use LogHero\Client\RedisLogBuffer;
 use LogHero\Client\LogTransport;
 use LogHero\Client\AsyncLogTransport;
@@ -59,7 +60,12 @@ class LogHeroPluginClient {
             LogHeroGlobals::Instance()->errors()->writeError('async-flush', $e);
         }
         catch(\Exception $e) {
-            LogHeroGlobals::Instance()->errors()->writeError('unexpected', $e);
+            try {
+                LogHeroGlobals::Instance()->errors()->writeError('unexpected', $e);
+            }
+            catch(PermissionDeniedException $permissionDeniedError) {
+                throw $e;
+            }
         }
     }
 
@@ -70,9 +76,11 @@ class LogHeroPluginClient {
         $this->logTransport->dumpLogEvents();
     }
 
-    # TODO: No storage in sync mode (read from DB only as workaround for permission denied)
     public static function createSettingsStorage() {
-        return new FileStorage(LogHeroGlobals::Instance()->getSettingsStorageFilename());
+        if (LogHeroPluginSettings::isAsyncFlush()) {
+            return new FileStorage(LogHeroGlobals::Instance()->getSettingsStorageFilename());
+        }
+        return null;
     }
 
     private function createLogBuffer() {
