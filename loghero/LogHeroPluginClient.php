@@ -8,6 +8,7 @@ use LogHero\Client\FileLogBuffer;
 use LogHero\Client\PermissionDeniedException;
 use LogHero\Client\RedisLogBuffer;
 use LogHero\Client\LogTransport;
+use LogHero\Client\DisabledLogTransport;
 use LogHero\Client\AsyncLogTransport;
 use LogHero\Client\AsyncFlushFailedException;
 use LogHero\Client\LogTransportType;
@@ -31,7 +32,12 @@ class LogHeroPluginClient {
         }
         $this->logEventFactory = new LogEventFactory();
         $logTransportType = $this->settings->getTransportType();
-        if ($logTransportType == LogTransportType::SYNC) {
+        if ($logTransportType === LogTransportType::DISABLED) {
+            $this->logTransport = new DisabledLogTransport(
+                $this->createLogBuffer()
+            );
+        }
+        else if ($logTransportType === LogTransportType::SYNC) {
             $this->logTransport = new LogTransport(
                 $this->createLogBuffer(),
                 $apiAccess
@@ -72,6 +78,9 @@ class LogHeroPluginClient {
     public function flush($token) {
         if ($token !== $this->apiSettings->getKey()) {
             throw new InvalidTokenException('Token is invalid');
+        }
+        if ($this->settings->getTransportType() !== LogTransportType::ASYNC) {
+            throw new InvalidTransportTypeException('Flush action needs async transport type');
         }
         $this->logTransport->dumpLogEvents();
     }

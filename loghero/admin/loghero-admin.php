@@ -9,6 +9,7 @@ use \LogHero\Client\PermissionDeniedException;
 class LogHeroAdmin {
     public static $settingsGroup = 'loghero';
     public static $useSyncTransportOptionLabel = 'Disable Async Mode';
+    public static $disableTransportOptionLabel = 'Disable Log Transport';
 
     public static function setup() {
         add_action('admin_menu', '\LogHero\Wordpress\LogHeroAdmin::addLogHeroAdminPage');
@@ -80,6 +81,13 @@ class LogHeroAdmin {
             'Advanced Setup',
             '', # TODO Add help text with this column
             static::$settingsGroup
+        );
+        static::addFieldToSection(
+            LogHeroPluginSettings::$disableTransportOptionName,
+            static::$disableTransportOptionLabel,
+            '\LogHero\Wordpress\LogHeroAdmin::disableTransportInputRenderer',
+            static::$settingsGroup,
+            $settingsSection
         );
         static::addFieldToSection(
             LogHeroPluginSettings::$useSyncTransportOptionName,
@@ -162,6 +170,21 @@ class LogHeroAdmin {
         />
         If enabled, log events are sent synchronously to the LogHero API.
         Use this option only if you are having trouble with the async mode.
+        <?php
+    }
+
+    public static function disableTransportInputRenderer() {
+        ?>
+        <input
+            name="<?php echo LogHeroPluginSettings::$disableTransportOptionName ?>"
+            id="<?php echo LogHeroPluginSettings::$disableTransportOptionName ?>"
+            type="checkbox"
+            value="1"
+            class="code"
+            <?php echo checked( 1, get_option( LogHeroPluginSettings::$disableTransportOptionName ), false ) ?>
+        />
+        If enabled, log events are never sent to the LogHero API.
+        Use this option if you want to submit the log events manually.
         <?php
     }
 

@@ -6,11 +6,12 @@ use LogHero\Client\RedisOptions;
 
 
 class LogHeroPluginSettings {
-    public static $useSyncTransportOptionName = 'use_sync_transport';
     public static $apiKeyOptionName = 'api_key';
     public static $redisUrlOptionName = 'redis_url';
     public static $redisKeyPrefixOptionName = 'redis_key_prefix';
     public static $apiEndpointOptionName = 'api_endpoint';
+    public static $useSyncTransportOptionName = 'use_sync_transport';
+    public static $disableTransportOptionName = 'disable_transport';
 
     private $settingsStorage;
     private $hasWordPress;
@@ -86,12 +87,7 @@ class LogHeroPluginSettings {
             $redisKeyPrefix = $this->getOption(static::$redisKeyPrefixOptionName, $jsonData);
             $this->redisOptions = new RedisOptions($redisUrl, $redisKeyPrefix);
         }
-        $useSyncTransport = $this->getOption(static::$useSyncTransportOptionName, $jsonData);
-        if ($useSyncTransport) {
-            $this->transportType = LogTransportType::SYNC;
-            return;
-        }
-        $this->transportType = LogTransportType::ASYNC;
+        $this->initializeTransportType($jsonData);
     }
 
     private function getOption($key, $jsonData) {
@@ -108,9 +104,24 @@ class LogHeroPluginSettings {
         return $this->getTransportType() === LogTransportType::ASYNC;
     }
 
+    private function initializeTransportType($jsonData) {
+        $disableTransport = $this->getOption(static::$disableTransportOptionName, $jsonData);
+        if ($disableTransport) {
+            $this->transportType = LogTransportType::DISABLED;
+            return;
+        }
+        $useSyncTransport = $this->getOption(static::$useSyncTransportOptionName, $jsonData);
+        if ($useSyncTransport) {
+            $this->transportType = LogTransportType::SYNC;
+            return;
+        }
+        $this->transportType = LogTransportType::ASYNC;
+    }
+
     private static function getOptionsToStore() {
         return array(
             static::$useSyncTransportOptionName,
+            static::$disableTransportOptionName,
             static::$apiKeyOptionName,
             static::$redisUrlOptionName,
             static::$redisKeyPrefixOptionName,

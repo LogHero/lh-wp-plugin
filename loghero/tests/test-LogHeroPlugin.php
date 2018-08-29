@@ -9,6 +9,7 @@ use \LogHero\Wordpress\LogHeroGlobals;
 use \LogHero\Wordpress\LogHeroAPISettings;
 use \LogHero\Wordpress\LogHeroPluginClient;
 use \LogHero\Wordpress\LogHero_Plugin;
+use LogHero\Wordpress\LogHeroPluginSettings;
 
 
 require_once __DIR__ . '/mock-microtime.php';
@@ -66,8 +67,9 @@ class LogHeroPluginTest extends \WP_UnitTestCase {
 
     public function setUp() {
         parent::setUp();
-        update_option('api_key', $this->apiKey);
-        update_option('use_sync_transport', false);
+        update_option(LogHeroPluginSettings::$apiKeyOptionName, $this->apiKey);
+        update_option(LogHeroPluginSettings::$useSyncTransportOptionName, false);
+        update_option(LogHeroPluginSettings::$disableTransportOptionName, false);
         $this->bufferFileLocation = __DIR__ . '/logs/buffer.loghero.io.txt';
         $this->settingsFileLocation = __DIR__ . '/logs/settings.loghero.io.json';
         $errorFilePrefix = __DIR__ . '/logs/errors.loghero.io';
@@ -212,6 +214,22 @@ class LogHeroPluginTest extends \WP_UnitTestCase {
             ->expects(static::once())
             ->method('submitLogPackage');
         $plugin->onShutdownAction();
+    }
+
+    /**
+     * @expectedException LogHero\Wordpress\InvalidTransportTypeException
+     * @expectedExceptionMessage Flush action needs async transport type
+     */
+    public function testDisableTransportIfConfigured() {
+        $this->setupServerGlobal('/page-url');
+        $this->fillUpFileLogBuffer();
+        update_option(LogHeroPluginSettings::$disableTransportOptionName, true);
+        $plugin = new LogHero_PluginTestImpl($this->apiAccessStub);
+        $this->apiAccessStub
+            ->expects(static::never())
+            ->method('submitLogPackage');
+        $plugin->onShutdownAction();
+        $plugin->onAsyncFlushAction($this->apiKey);
     }
 
     public function testWriteUnexpectedFailuresToErrorFile() {
