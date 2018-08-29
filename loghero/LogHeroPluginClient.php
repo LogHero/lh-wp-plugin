@@ -1,7 +1,6 @@
 <?php
 
 namespace LogHero\Wordpress;
-use LogHero\Client\APIKeyFileStorage;
 use LogHero\Client\APIAccess;
 use LogHero\Client\APISettingsInterface;
 use LogHero\Client\LogEventFactory;
@@ -17,17 +16,17 @@ use Predis\Client;
 
 
 class LogHeroPluginClient {
-    private $apiKeyStorage;
     private $logEventFactory;
     private $settings;
+    private $apiSettings;
     protected $logTransport;
 
     public function __construct($flushEndpoint = null, $apiAccess = null) {
         $clientId = LogHeroGlobals::Instance()->getClientId();
-        $this->apiKeyStorage = new APIKeyFileStorage(LogHeroGlobals::Instance()->getAPIKeyStorageFilename());
         $this->settings = new LogHeroPluginSettings(static::createSettingsStorage());
+        $this->apiSettings = new LogHeroAPISettings($this->settings);
         if (!$apiAccess) {
-            $apiAccess = new APIAccess($this->apiKeyStorage, $clientId, new LogHeroAPISettings($this->settings));
+            $apiAccess = new APIAccess($clientId, $this->apiSettings);
         }
         $this->logEventFactory = new LogEventFactory();
         $logTransportType = $this->settings->getTransportType();
@@ -42,7 +41,7 @@ class LogHeroPluginClient {
                 $this->createLogBuffer(),
                 $apiAccess,
                 $clientId,
-                $this->apiKeyStorage->getKey(),
+                $this->apiSettings->getKey(),
                 $flushEndpoint
             );
         }
@@ -65,7 +64,7 @@ class LogHeroPluginClient {
     }
 
     public function flush($token) {
-        if ($token !== $this->apiKeyStorage->getKey()) {
+        if ($token !== $this->apiSettings->getKey()) {
             throw new InvalidTokenException('Token is invalid');
         }
         $this->logTransport->dumpLogEvents();
@@ -73,7 +72,7 @@ class LogHeroPluginClient {
 
     # TODO: No storage in sync mode (read from DB only as workaround for permission denied)
     public static function createSettingsStorage() {
-        return new FileStorage(__DIR__ . '/logs/settings.loghero.io.json');
+        return new FileStorage(LogHeroGlobals::Instance()->getSettingsStorageFilename());
     }
 
     private function createLogBuffer() {

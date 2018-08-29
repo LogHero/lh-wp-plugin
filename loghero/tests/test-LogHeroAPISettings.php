@@ -12,12 +12,18 @@ class LogHeroAPISettingsTest extends \WP_UnitTestCase {
 
     public function testProvideDefaultSettings() {
         $settings = new LogHeroAPISettings(new LogHeroPluginSettings());
-        static::assertEquals('https://api.loghero.io/logs/', $settings->getAPILogPackageEndpoint());
+        static::assertEquals('https://api.loghero.io/logs/', $settings->getLogPackageEndpoint());
     }
 
     public function testProvideCustomizedSettings() {
         update_option(LogHeroPluginSettings::$apiEndpointOptionName, 'https://test.loghero.io/logs/');
         $settings = new LogHeroAPISettings(new LogHeroPluginSettings());
-        static::assertEquals('https://test.loghero.io/logs/', $settings->getAPILogPackageEndpoint());
+        static::assertEquals('https://test.loghero.io/logs/', $settings->getLogPackageEndpoint());
+    }
+
+    public function testProvideApiKey() {
+        update_option(LogHeroPluginSettings::$apiKeyOptionName, 'SOME_API_KEY');
+        $settings = new LogHeroAPISettings(new LogHeroPluginSettings());
+        static::assertEquals('SOME_API_KEY', $settings->getKey());
     }
 }

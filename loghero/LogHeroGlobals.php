@@ -1,19 +1,18 @@
 <?php
 
 namespace LogHero\Wordpress;
-use \LogHero\Client\APIKeyFileStorage;
 use \LogHero\Client\LogHeroErrors;
 
 
 class LogHeroGlobals {
     private $logEventsBufferFile;
-    private $apiKeyStorageFile;
+    private $settingsStorageFile;
     private $errors;
     private static $Instance;
 
     private function __construct() {
         $this->logEventsBufferFile = __DIR__ . '/logs/buffer.loghero.io.txt';
-        $this->apiKeyStorageFile = __DIR__ . '/logs/key.loghero.io.txt';
+        $this->settingsStorageFile = __DIR__ . '/logs/settings.loghero.io.json';
         $this->errors = new LogHeroErrors(__DIR__ . '/logs/errors.loghero.io');
     }
 
@@ -36,17 +35,12 @@ class LogHeroGlobals {
         return $this->logEventsBufferFile;
     }
 
-    public function setAPIKeyStorageFilename($apiKeyStorageFile) {
-        $this->apiKeyStorageFile = $apiKeyStorageFile;
+    public function setSettingsStorageFilename($settingsStorageFile) {
+        $this->settingsStorageFile = $settingsStorageFile;
     }
 
-    public function getAPIKeyStorageFilename() {
-        return $this->apiKeyStorageFile;
-    }
-
-    public function refreshAPIKey($apiKey) {
-        $apiKeyStorage = new APIKeyFileStorage($this->getAPIKeyStorageFilename());
-        $apiKeyStorage->setKey($apiKey);
+    public function getSettingsStorageFilename() {
+        return $this->settingsStorageFile;
     }
 
     public function errors() {

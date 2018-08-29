@@ -10,11 +10,15 @@ class LogHeroAPISettings extends APISettingsDefault {
         $this->pluginSettings = $pluginSettings;
     }
 
-    public function getAPILogPackageEndpoint() {
+    public function getKey() {
+        return $this->pluginSettings->getApiKey();
+    }
+
+    public function getLogPackageEndpoint() {
         $customEndpoint = $this->pluginSettings->getApiEndpoint();
         if ($customEndpoint) {
             return $customEndpoint;
         }
-        return parent::getAPILogPackageEndpoint();
+        return parent::getLogPackageEndpoint();
     }
 }
