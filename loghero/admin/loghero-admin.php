@@ -186,9 +186,10 @@ class LogHeroAdmin {
             $unexpectedError = LogHeroGlobals::Instance()->errors()->getError('unexpected');
             if ($unexpectedError) {
                 echo '<div class="notice notice-warning is-dismissible">
-                 <p>Your LogHero plugin does not work propery!</p>
-                 <p>Error message: ' . $unexpectedError . '</p>
-             </div>';
+                     <p>Your LogHero plugin does not work propery!</p>
+                     <p>Error message: ' . $unexpectedError . '</p>
+                 </div>';
+                LogHeroGlobals::Instance()->errors()->resolveError('unexpected');
             }
         }
         catch(PermissionDeniedException $permissionDeniedError) {
