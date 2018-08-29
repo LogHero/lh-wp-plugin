@@ -6,16 +6,19 @@ use LogHero\Client\APIAccess;
 use LogHero\Client\APISettingsInterface;
 use LogHero\Client\LogEventFactory;
 use LogHero\Client\FileLogBuffer;
+use LogHero\Client\RedisLogBuffer;
 use LogHero\Client\LogTransport;
 use LogHero\Client\AsyncLogTransport;
 use LogHero\Client\AsyncFlushFailedException;
 use LogHero\Client\LogTransportType;
 use LogHero\Wordpress\LogHeroPluginSettings;
+use Predis\Client;
 
 
 class LogHeroPluginClient {
     private $apiKeyStorage;
     private $logEventFactory;
+    private $settings;
     protected $logTransport;
 
     public function __construct(APISettingsInterface $apiSettings, $flushEndpoint = null, $apiAccess = null) {
@@ -24,17 +27,18 @@ class LogHeroPluginClient {
         if (!$apiAccess) {
             $apiAccess = new APIAccess($this->apiKeyStorage, $clientId, $apiSettings);
         }
+        $this->settings = new LogHeroPluginSettings();
         $this->logEventFactory = new LogEventFactory();
-        $logTransportType = LogHeroPluginSettings::getTransportType();
+        $logTransportType = $this->settings->getTransportType();
         if ($logTransportType == LogTransportType::SYNC) {
             $this->logTransport = new LogTransport(
-                new FileLogBuffer(LogHeroGlobals::Instance()->getLogEventsBufferFilename()),
+                $this->createLogBuffer(),
                 $apiAccess
             );
         }
         else {
             $this->logTransport = new AsyncLogTransport(
-                new FileLogBuffer(LogHeroGlobals::Instance()->getLogEventsBufferFilename()),
+                $this->createLogBuffer(),
                 $apiAccess,
                 $clientId,
                 $this->apiKeyStorage->getKey(),
@@ -64,6 +68,14 @@ class LogHeroPluginClient {
             throw new InvalidTokenException('Token is invalid');
         }
         $this->logTransport->dumpLogEvents();
+    }
+
+    private function createLogBuffer() {
+        $redisOptions = $this->settings->getRedisOptions();
+        if ($redisOptions) {
+            return new RedisLogBuffer(new \Predis\Client($redisOptions->getRedisUrl()), $redisOptions);
+        }
+        return new FileLogBuffer(LogHeroGlobals::Instance()->getLogEventsBufferFilename());
     }
 
 }

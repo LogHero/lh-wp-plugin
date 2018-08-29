@@ -51,7 +51,7 @@ if (!class_exists( 'LogHeroClient_Plugin')) {
                     LogHeroGlobals::Instance()->refreshAPIKey($apiKeyFromDb);
                     $this->initialize();
                 }
-                self::refreshAPISettings();
+                self::refreshPluginSettings();
             }
             catch (PermissionDeniedException $e) {
             }
@@ -64,7 +64,11 @@ if (!class_exists( 'LogHeroClient_Plugin')) {
             return self::$Instance;
         }
 
-        public static function refreshAPISettings() {
+        public static function refreshPluginSettings() {
+            $pluginSettings = new LogHeroPluginSettings();
+            $pluginSettings->flushToSettingsStorage();
+
+            # TODO: Combine with plugin settings:
             $apiEndpointFromDb = get_option('api_endpoint');
             $apiSettings = new \LogHero\Wordpress\LogHeroAPISettings();
             $apiSettings->setAPILogPackageEndpoint($apiEndpointFromDb);
