@@ -43,14 +43,14 @@ class LogHeroPluginSettingsTest extends \WP_UnitTestCase {
         update_option(LogHeroPluginSettings::$redisUrlOptionName, 'REDIS_URL');
         static::assertEquals('REDIS_URL', $this->createSettings()->getRedisOptions()->getRedisUrl());
         static::assertEquals(
-            RedisOptions::$defaultRedisKeyPredix,
+            'io.loghero:wp:SOME_API_KEY',
             $this->createSettings()->getRedisOptions()->getRedisKeyPrefix()
         );
         update_option(LogHeroPluginSettings::$redisKeyPrefixOptionName, 'REDIS_PREFIX');
         static::assertEquals('REDIS_PREFIX', $this->createSettings()->getRedisOptions()->getRedisKeyPrefix());
         update_option(LogHeroPluginSettings::$redisKeyPrefixOptionName, '');
         static::assertEquals(
-            RedisOptions::$defaultRedisKeyPredix,
+            'io.loghero:wp:SOME_API_KEY',
             $this->createSettings()->getRedisOptions()->getRedisKeyPrefix()
         );
         update_option(LogHeroPluginSettings::$redisUrlOptionName, '');
