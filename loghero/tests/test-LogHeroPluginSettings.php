@@ -101,6 +101,9 @@ class LogHeroPluginSettingsTest extends \WP_UnitTestCase {
         static::assertTrue(LogHeroPluginSettings::isAsyncFlush());
         update_option(LogHeroPluginSettings::$useSyncTransportOptionName, true);
         static::assertFalse(LogHeroPluginSettings::isAsyncFlush());
+        update_option(LogHeroPluginSettings::$useSyncTransportOptionName, false);
+        update_option(LogHeroPluginSettings::$disableTransportOptionName, true);
+        static::assertFalse(LogHeroPluginSettings::isAsyncFlush());
     }
 
     public function testSpecifyIfAccessToLogsFolderIsRequired() {
