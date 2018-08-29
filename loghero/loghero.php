@@ -65,7 +65,7 @@ if (!class_exists( 'LogHeroClient_Plugin')) {
         }
 
         public static function refreshPluginSettings() {
-            $pluginSettings = new LogHeroPluginSettings();
+            $pluginSettings = new LogHeroPluginSettings(LogHeroPluginClient::createSettingsStorage());
             $pluginSettings->flushToSettingsStorage();
 
             # TODO: Combine with plugin settings:

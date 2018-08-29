@@ -1,5 +1,6 @@
 <?php
 namespace LogHero\Wordpress\Test;
+use LogHero\Client\FileStorage;
 use \LogHero\Wordpress\LogHeroPluginSettings;
 use \LogHero\Client\LogTransportType;
 use \LogHero\Client\RedisOptions;
@@ -72,7 +73,14 @@ class LogHeroPluginSettingsTest extends \WP_UnitTestCase {
         static::assertEquals('API_KEY_FROM_STORAGE', $settings->getApiKey());
     }
 
+    public function testIgnoreStorageIfNotProvided() {
+        $settingsWithoutStorage = new LogHeroPluginSettings();
+        static::assertEquals('SOME_API_KEY', $settingsWithoutStorage->getApiKey());
+        $settingsWithoutStorageAndWordPress = new LogHeroPluginSettings(null, False);
+        static::assertNull($settingsWithoutStorageAndWordPress->getApiKey());
+    }
+
     private function createSettings($hasWordPress = null) {
-        return new LogHeroPluginSettings($hasWordPress, $this->settingsFilename);
+        return new LogHeroPluginSettings(new FileStorage($this->settingsFilename), $hasWordPress);
     }
 }

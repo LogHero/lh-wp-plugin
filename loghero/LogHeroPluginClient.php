@@ -12,6 +12,7 @@ use LogHero\Client\AsyncLogTransport;
 use LogHero\Client\AsyncFlushFailedException;
 use LogHero\Client\LogTransportType;
 use LogHero\Wordpress\LogHeroPluginSettings;
+use LogHero\Client\FileStorage;
 use Predis\Client;
 
 
@@ -27,7 +28,7 @@ class LogHeroPluginClient {
         if (!$apiAccess) {
             $apiAccess = new APIAccess($this->apiKeyStorage, $clientId, $apiSettings);
         }
-        $this->settings = new LogHeroPluginSettings();
+        $this->settings = new LogHeroPluginSettings(static::createSettingsStorage());
         $this->logEventFactory = new LogEventFactory();
         $logTransportType = $this->settings->getTransportType();
         if ($logTransportType == LogTransportType::SYNC) {
@@ -68,6 +69,11 @@ class LogHeroPluginClient {
             throw new InvalidTokenException('Token is invalid');
         }
         $this->logTransport->dumpLogEvents();
+    }
+
+    # TODO: No storage in sync mode (read from DB only as workaround for permission denied)
+    public static function createSettingsStorage() {
+        return new FileStorage(__DIR__ . '/logs/settings.loghero.io.json');
     }
 
     private function createLogBuffer() {

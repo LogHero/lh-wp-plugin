@@ -11,22 +11,19 @@ class LogHeroPluginSettings {
     public static $redisUrlOptionName = 'redis_url';
     public static $redisKeyPrefixOptionName = 'redis_key_prefix';
 
-    private $settingsFilename;
+    private $settingsStorage;
     private $hasWordPress;
 
     private $apiKey;
     private $transportType;
     private $redisOptions;
 
-    public function __construct($hasWordPress = null, $settingsFilename = null) {
-        if (!$settingsFilename) {
-            $settingsFilename = __DIR__ . '/logs/settings.loghero.io.json';
-        }
+    public function __construct($settingsStorage = null, $hasWordPress = null) {
         if ($hasWordPress === null) {
             $hasWordPress = function_exists('get_option') ? True : False;
         }
         $this->hasWordPress = $hasWordPress;
-        $this->settingsFilename = $settingsFilename;
+        $this->settingsStorage = $settingsStorage;
         $this->initializeSettings();
     }
 
@@ -43,22 +40,20 @@ class LogHeroPluginSettings {
         return $this->redisOptions;
     }
 
-    # TODO: Introduce generic storage strategy for errors and settings (File, Redis, ...)
     public function flushToSettingsStorage() {
         $optionsToStore = static::getOptionsToStore();
         $jsonData = array();
         foreach($optionsToStore as $option) {
             $jsonData[$option] = get_option($option);
         }
-        file_put_contents($this->settingsFilename, json_encode($jsonData));
-        chmod($this->settingsFilename, 0666);
+        $this->settingsStorage->set(json_encode($jsonData));
     }
 
     private function initializeSettings() {
         $jsonData = null;
-        if (file_exists($this->settingsFilename)) {
-            $jsonString = file_get_contents($this->settingsFilename);
-            $jsonData = json_decode($jsonString, true);
+        $storageData = $this->settingsStorage ? $this->settingsStorage->get() : null;
+        if ($storageData) {
+            $jsonData = json_decode($storageData, true);
         }
         $this->apiKey = $this->getOption(static::$apiKeyOptionName, $jsonData);
         $redisUrl = $this->getOption(static::$redisUrlOptionName, $jsonData);
