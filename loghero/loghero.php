@@ -65,13 +65,8 @@ if (!class_exists( 'LogHeroClient_Plugin')) {
         }
 
         public static function refreshPluginSettings() {
-            $pluginSettings = new LogHeroPluginSettings();
+            $pluginSettings = new LogHeroPluginSettings(LogHeroPluginClient::createSettingsStorage());
             $pluginSettings->flushToSettingsStorage();
-
-            # TODO: Combine with plugin settings:
-            $apiEndpointFromDb = get_option('api_endpoint');
-            $apiSettings = new \LogHero\Wordpress\LogHeroAPISettings();
-            $apiSettings->setAPILogPackageEndpoint($apiEndpointFromDb);
         }
 
         protected function flushEndpoint() {
@@ -82,7 +77,7 @@ if (!class_exists( 'LogHeroClient_Plugin')) {
         }
 
         private function initialize() {
-            $this->logHeroClient = new LogHeroPluginClient(new LogHeroAPISettings(), $this->flushEndpoint());
+            $this->logHeroClient = new LogHeroPluginClient($this->flushEndpoint());
             add_action('shutdown', array($this->logHeroClient, 'submitLogEvent'));
         }
     }

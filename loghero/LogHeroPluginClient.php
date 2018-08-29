@@ -1,33 +1,34 @@
 <?php
 
 namespace LogHero\Wordpress;
-use LogHero\Client\APIKeyFileStorage;
 use LogHero\Client\APIAccess;
 use LogHero\Client\APISettingsInterface;
 use LogHero\Client\LogEventFactory;
 use LogHero\Client\FileLogBuffer;
+use LogHero\Client\PermissionDeniedException;
 use LogHero\Client\RedisLogBuffer;
 use LogHero\Client\LogTransport;
 use LogHero\Client\AsyncLogTransport;
 use LogHero\Client\AsyncFlushFailedException;
 use LogHero\Client\LogTransportType;
 use LogHero\Wordpress\LogHeroPluginSettings;
+use LogHero\Client\FileStorage;
 use Predis\Client;
 
 
 class LogHeroPluginClient {
-    private $apiKeyStorage;
     private $logEventFactory;
     private $settings;
+    private $apiSettings;
     protected $logTransport;
 
-    public function __construct(APISettingsInterface $apiSettings, $flushEndpoint = null, $apiAccess = null) {
+    public function __construct($flushEndpoint = null, $apiAccess = null) {
         $clientId = LogHeroGlobals::Instance()->getClientId();
-        $this->apiKeyStorage = new APIKeyFileStorage(LogHeroGlobals::Instance()->getAPIKeyStorageFilename());
+        $this->settings = new LogHeroPluginSettings(static::createSettingsStorage());
+        $this->apiSettings = new LogHeroAPISettings($this->settings);
         if (!$apiAccess) {
-            $apiAccess = new APIAccess($this->apiKeyStorage, $clientId, $apiSettings);
+            $apiAccess = new APIAccess($clientId, $this->apiSettings);
         }
-        $this->settings = new LogHeroPluginSettings();
         $this->logEventFactory = new LogEventFactory();
         $logTransportType = $this->settings->getTransportType();
         if ($logTransportType == LogTransportType::SYNC) {
@@ -41,7 +42,7 @@ class LogHeroPluginClient {
                 $this->createLogBuffer(),
                 $apiAccess,
                 $clientId,
-                $this->apiKeyStorage->getKey(),
+                $this->apiSettings->getKey(),
                 $flushEndpoint
             );
         }
@@ -59,15 +60,27 @@ class LogHeroPluginClient {
             LogHeroGlobals::Instance()->errors()->writeError('async-flush', $e);
         }
         catch(\Exception $e) {
-            LogHeroGlobals::Instance()->errors()->writeError('unexpected', $e);
+            try {
+                LogHeroGlobals::Instance()->errors()->writeError('unexpected', $e);
+            }
+            catch(PermissionDeniedException $permissionDeniedError) {
+                throw $e;
+            }
         }
     }
 
     public function flush($token) {
-        if ($token !== $this->apiKeyStorage->getKey()) {
+        if ($token !== $this->apiSettings->getKey()) {
             throw new InvalidTokenException('Token is invalid');
         }
         $this->logTransport->dumpLogEvents();
+    }
+
+    public static function createSettingsStorage() {
+        if (LogHeroPluginSettings::isAsyncFlush()) {
+            return new FileStorage(LogHeroGlobals::Instance()->getSettingsStorageFilename());
+        }
+        return null;
     }
 
     private function createLogBuffer() {

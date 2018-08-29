@@ -10,23 +10,22 @@ class LogHeroPluginSettings {
     public static $apiKeyOptionName = 'api_key';
     public static $redisUrlOptionName = 'redis_url';
     public static $redisKeyPrefixOptionName = 'redis_key_prefix';
+    public static $apiEndpointOptionName = 'api_endpoint';
 
-    private $settingsFilename;
+    private $settingsStorage;
     private $hasWordPress;
 
     private $apiKey;
     private $transportType;
     private $redisOptions;
+    private $apiEndpoint;
 
-    public function __construct($hasWordPress = null, $settingsFilename = null) {
-        if (!$settingsFilename) {
-            $settingsFilename = __DIR__ . '/logs/settings.loghero.io.json';
-        }
+    public function __construct($settingsStorage = null, $hasWordPress = null) {
         if ($hasWordPress === null) {
             $hasWordPress = function_exists('get_option') ? True : False;
         }
         $this->hasWordPress = $hasWordPress;
-        $this->settingsFilename = $settingsFilename;
+        $this->settingsStorage = $settingsStorage;
         $this->initializeSettings();
     }
 
@@ -43,24 +42,45 @@ class LogHeroPluginSettings {
         return $this->redisOptions;
     }
 
-    # TODO: Introduce generic storage strategy for errors and settings (File, Redis, ...)
+    public function getApiEndpoint() {
+        return $this->apiEndpoint;
+    }
+
     public function flushToSettingsStorage() {
         $optionsToStore = static::getOptionsToStore();
         $jsonData = array();
         foreach($optionsToStore as $option) {
             $jsonData[$option] = get_option($option);
         }
-        file_put_contents($this->settingsFilename, json_encode($jsonData));
-        chmod($this->settingsFilename, 0666);
+        if ($this->settingsStorage) {
+            $this->settingsStorage->set(json_encode($jsonData));
+        }
+    }
+
+    public static function accessToLogsFolderIsRequired() {
+        $settings = new self();
+        if ($settings->isAsyncFlushInternally()) {
+            return true;
+        }
+        return $settings->getRedisOptions() === null;
+    }
+
+    public static function isAsyncFlush() {
+        $settings = new self();
+        return $settings->isAsyncFlushInternally();
     }
 
     private function initializeSettings() {
         $jsonData = null;
-        if (file_exists($this->settingsFilename)) {
-            $jsonString = file_get_contents($this->settingsFilename);
-            $jsonData = json_decode($jsonString, true);
+        $storageData = $this->settingsStorage ? $this->settingsStorage->get() : null;
+        if ($storageData) {
+            $jsonData = json_decode($storageData, true);
         }
         $this->apiKey = $this->getOption(static::$apiKeyOptionName, $jsonData);
+        $apiEndpoint = $this->getOption(static::$apiEndpointOptionName, $jsonData);
+        if ($apiEndpoint) {
+            $this->apiEndpoint = $apiEndpoint;
+        }
         $redisUrl = $this->getOption(static::$redisUrlOptionName, $jsonData);
         if($redisUrl) {
             $redisKeyPrefix = $this->getOption(static::$redisKeyPrefixOptionName, $jsonData);
@@ -84,12 +104,17 @@ class LogHeroPluginSettings {
         return null;
     }
 
+    private function isAsyncFlushInternally() {
+        return $this->getTransportType() === LogTransportType::ASYNC;
+    }
+
     private static function getOptionsToStore() {
         return array(
             static::$useSyncTransportOptionName,
             static::$apiKeyOptionName,
             static::$redisUrlOptionName,
-            static::$redisKeyPrefixOptionName
+            static::$redisKeyPrefixOptionName,
+            static::$apiEndpointOptionName
         );
     }
 

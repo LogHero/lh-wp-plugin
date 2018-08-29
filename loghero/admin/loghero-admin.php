@@ -186,24 +186,26 @@ class LogHeroAdmin {
             $unexpectedError = LogHeroGlobals::Instance()->errors()->getError('unexpected');
             if ($unexpectedError) {
                 echo '<div class="notice notice-warning is-dismissible">
-                 <p>Your LogHero plugin does not work propery!</p>
-                 <p>Error message: ' . $unexpectedError . '</p>
-             </div>';
+                     <p>Your LogHero plugin does not work propery!</p>
+                     <p>Error message: ' . $unexpectedError . '</p>
+                 </div>';
+                LogHeroGlobals::Instance()->errors()->resolveError('unexpected');
             }
         }
         catch(PermissionDeniedException $permissionDeniedError) {
-            echo '<div class="notice notice-error is-dismissible">
+            if (LogHeroPluginSettings::accessToLogsFolderIsRequired()) {
+                echo '<div class="notice notice-error is-dismissible">
                  <p>Your LogHero plugin cannot write to the "logs" folder (permission denied). Please set access rights properly or disable the plugin.
                  For more information visit <a target="_blank" href="https://log-hero.com/docs/permission-denied">https://log-hero.com/docs/permission-denied</a>.</p>
                  <p>Error message: ' . $permissionDeniedError->getMessage() . '</p>
-             </div>';
+                </div>';
+            }
         }
     }
 
     private static function flushSettingsToFiles() {
         try {
             LogHero_Plugin::refreshPluginSettings();
-            LogHeroGlobals::Instance()->refreshAPIKey(get_option(LogHeroPluginSettings::$apiKeyOptionName));
             $useSyncTransport = get_option(LogHeroPluginSettings::$useSyncTransportOptionName);
             if ($useSyncTransport) {
                 LogHeroGlobals::Instance()->errors()->resolveError('async-flush');

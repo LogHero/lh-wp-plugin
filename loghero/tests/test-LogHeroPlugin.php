@@ -4,7 +4,6 @@ use \LogHero\Client\APIAccessInterface;
 use \LogHero\Client\APISettingsInterface;
 use \LogHero\Client\LogTransportInterface;
 use \LogHero\Client\AsyncFlushFailedException;
-use \LogHero\Client\APIKeyMemStorage;
 use \LogHero\Client\FileLogBuffer;
 use \LogHero\Wordpress\LogHeroGlobals;
 use \LogHero\Wordpress\LogHeroAPISettings;
@@ -17,8 +16,8 @@ require_once __DIR__ . '/../sdk/test/Util.php';
 
 
 class LogHeroPluginClientTestImpl extends LogHeroPluginClient {
-    public function __construct(APISettingsInterface $apiSettings, $flushEndpoint = null, $apiAccess = null) {
-        parent::__construct($apiSettings, $flushEndpoint, $apiAccess);
+    public function __construct($flushEndpoint = null, $apiAccess = null) {
+        parent::__construct($flushEndpoint, $apiAccess);
     }
 
     public function setCustomLogTransport($logTransport) {
@@ -34,7 +33,6 @@ class LogHero_PluginTestImpl extends LogHero_Plugin {
         parent::__construct();
         if ($apiAccessStub) {
             $this->logHeroTestClient = new LogHeroPluginClientTestImpl(
-                new LogHeroAPISettings(),
                 '/flush.php',
                 $apiAccessStub
             );
@@ -62,7 +60,7 @@ class LogHeroPluginTest extends \WP_UnitTestCase {
     private $plugin;
     private $apiAccessStub;
     private $bufferFileLocation;
-    private $apiKeyFileLocation;
+    private $settingsFileLocation;
     private $asyncErrorsFilename;
     private $unexpectedErrorsFilename;
 
@@ -71,14 +69,13 @@ class LogHeroPluginTest extends \WP_UnitTestCase {
         update_option('api_key', $this->apiKey);
         update_option('use_sync_transport', false);
         $this->bufferFileLocation = __DIR__ . '/logs/buffer.loghero.io.txt';
-        $this->apiKeyFileLocation = __DIR__ . '/logs/key.loghero.io.txt';
+        $this->settingsFileLocation = __DIR__ . '/logs/settings.loghero.io.json';
         $errorFilePrefix = __DIR__ . '/logs/errors.loghero.io';
         $this->asyncErrorsFilename = $errorFilePrefix . '.async-flush.txt';
         $this->unexpectedErrorsFilename = $errorFilePrefix . '.unexpected.txt';
         LogHeroGlobals::Instance()->setLogEventsBufferFilename($this->bufferFileLocation);
-        LogHeroGlobals::Instance()->setAPIKeyStorageFilename($this->apiKeyFileLocation);
+        LogHeroGlobals::Instance()->setSettingsStorageFilename($this->settingsFileLocation);
         LogHeroGlobals::Instance()->errors()->setErrorFilenamePrefix($errorFilePrefix);
-        $this->apiKeyStorage = new APIKeyMemStorage();
         $this->apiAccessStub = $this->getMockBuilder(APIAccessInterface::class)->getMock();
         $this->plugin = new LogHero_PluginTestImpl($this->apiAccessStub);
     }
@@ -89,8 +86,8 @@ class LogHeroPluginTest extends \WP_UnitTestCase {
         if(file_exists($this->bufferFileLocation)) {
             unlink($this->bufferFileLocation);
         }
-        if(file_exists($this->apiKeyFileLocation)) {
-            unlink($this->apiKeyFileLocation);
+        if(file_exists($this->settingsFileLocation)) {
+            unlink($this->settingsFileLocation);
         }
         if(file_exists($this->asyncErrorsFilename)) {
             unlink($this->asyncErrorsFilename);
@@ -214,7 +211,6 @@ class LogHeroPluginTest extends \WP_UnitTestCase {
         $this->apiAccessStub
             ->expects(static::once())
             ->method('submitLogPackage');
-
         $plugin->onShutdownAction();
     }
 
@@ -264,7 +260,7 @@ class LogHeroPluginTest extends \WP_UnitTestCase {
     }
 
     public function testRefreshAPIKeyFromDbIfKeyUndefined() {
-        LogHeroGlobals::Instance()->refreshAPIKey(null);
+        file_put_contents($this->settingsFileLocation, '{}');
         $plugin = new LogHero_PluginTestImpl($this->apiAccessStub);
         $this->setupServerGlobal('/page-url');
         $this->apiAccessStub
@@ -290,7 +286,7 @@ class LogHeroPluginTest extends \WP_UnitTestCase {
 
     public function testInitializeEmptyPluginFromScratch() {
         update_option('api_key', null);
-        LogHeroGlobals::Instance()->refreshAPIKey(null);
+        file_put_contents($this->settingsFileLocation, '{}');
         new LogHero_PluginTestImpl();
     }
 
