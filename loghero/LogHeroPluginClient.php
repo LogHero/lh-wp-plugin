@@ -2,7 +2,6 @@
 
 namespace LogHero\Wordpress;
 use LogHero\Client\APIAccess;
-use LogHero\Client\APISettingsInterface;
 use LogHero\Client\LogEventFactory;
 use LogHero\Client\FileLogBuffer;
 use LogHero\Client\PermissionDeniedException;
