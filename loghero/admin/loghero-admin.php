@@ -218,7 +218,7 @@ class LogHeroAdmin {
         catch(PermissionDeniedException $permissionDeniedError) {
             if (LogHeroPluginSettings::accessToLogsFolderIsRequired()) {
                 echo '<div class="notice notice-error is-dismissible">
-                 <p>Your LogHero plugin cannot write to the "logs" folder (permission denied). Please set access rights properly or disable the plugin.
+                 <p>Your LogHero plugin cannot write to the "logs" folder (permission denied). Please set access rights properly or use the Redis log buffer with synchronous flush.
                  For more information visit <a target="_blank" href="https://log-hero.com/docs/permission-denied">https://log-hero.com/docs/permission-denied</a>.</p>
                  <p>Error message: ' . $permissionDeniedError->getMessage() . '</p>
                 </div>';
