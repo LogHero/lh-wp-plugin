@@ -100,6 +100,11 @@ You'll find answers to many of your questions on [log-hero.com](https://log-hero
 
 == Changelog ==
 
+= [0.2.3] =
+= Added =
+* Redis log buffer as an alternative to the file log buffer
+* Option to disable flush of log events
+
 = [0.2.2] =
 = Added =
 * Admin error message if plugin cannot write to log buffer
@@ -114,6 +119,9 @@ You'll find answers to many of your questions on [log-hero.com](https://log-hero
 * Option to switch from asynchronous mode to synchronous mode
 
 == Upgrade Notice ==
+
+= [0.2.3] =
+Added Redis log buffer as an alternative to the file log buffer.
 
 = [0.2.2] =
 Evaluation of IP ranges to improve bot detection, send protocol version (http or https), improved error handling and reporting.
