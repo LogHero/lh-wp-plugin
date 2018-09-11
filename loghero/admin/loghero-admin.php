@@ -240,5 +240,9 @@ class LogHeroAdmin {
 
 }
 
+# LOG-182
+require_once __DIR__ . '/loghero-admin-migrate.php';
+
+
 LogHeroAdmin::setup();
 require_once __DIR__ . '/loghero-admin-dev.php';

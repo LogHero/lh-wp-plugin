@@ -6,12 +6,12 @@ use LogHero\Client\RedisOptions;
 
 
 class LogHeroPluginSettings {
-    public static $apiKeyOptionName = 'api_key';
-    public static $redisUrlOptionName = 'redis_url';
-    public static $redisKeyPrefixOptionName = 'redis_key_prefix';
-    public static $apiEndpointOptionName = 'api_endpoint';
-    public static $useSyncTransportOptionName = 'use_sync_transport';
-    public static $disableTransportOptionName = 'disable_transport';
+    public static $apiKeyOptionName = 'loghero_api_key';
+    public static $redisUrlOptionName = 'loghero_redis_url';
+    public static $redisKeyPrefixOptionName = 'loghero_redis_key_prefix';
+    public static $apiEndpointOptionName = 'loghero_api_endpoint';
+    public static $useSyncTransportOptionName = 'loghero_use_sync_transport';
+    public static $disableTransportOptionName = 'loghero_disable_transport';
     public static $defaultRedisKeyPrefix = 'io.loghero:wp';
 
     private $settingsStorage;
@@ -83,6 +83,12 @@ class LogHeroPluginSettings {
             $jsonData = json_decode($storageData, true);
         }
         $this->apiKey = $this->getOption(static::$apiKeyOptionName, $jsonData);
+
+        # LOG-182
+        if (!$this->apiKey) {
+            $this->apiKey = $this->getOption('api_key', $jsonData);
+        }
+
         $apiEndpoint = $this->getOption(static::$apiEndpointOptionName, $jsonData);
         if ($apiEndpoint) {
             $this->apiEndpoint = $apiEndpoint;
