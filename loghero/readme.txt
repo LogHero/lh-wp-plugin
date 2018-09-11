@@ -104,6 +104,7 @@ You'll find answers to many of your questions on [log-hero.com](https://log-hero
 = Added =
 * Redis log buffer as an alternative to the file log buffer
 * Option to disable flush of log events
+* Added prefix to plugin options to avoid name collisions
 
 = [0.2.2] =
 = Added =
@@ -121,7 +122,7 @@ You'll find answers to many of your questions on [log-hero.com](https://log-hero
 == Upgrade Notice ==
 
 = [0.2.3] =
-Added Redis log buffer as an alternative to the file log buffer.
+Added Redis log buffer as an alternative to the file log buffer, added prefix to plugin options to avoid name collisions.
 
 = [0.2.2] =
 Evaluation of IP ranges to improve bot detection, send protocol version (http or https), improved error handling and reporting.
