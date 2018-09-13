@@ -1,4 +1,5 @@
 <?php
+use LogHero\Wordpress\LogHeroPluginSettings;
 
 function loghero_dev_options_page()
 {
@@ -65,6 +66,11 @@ function loghero_dev_admin_add_page() {
 
 function loghero_api_endpoint_input_renderer() {
     ?>
-    <input type="text" name="api_endpoint" id="api_endpoint" value="<?php echo get_option('api_endpoint'); ?>" />
+    <input
+        type="text"
+        name="<?php echo LogHeroPluginSettings::$apiEndpointOptionName ?>"
+        id="<?php echo LogHeroPluginSettings::$apiEndpointOptionName ?>"
+        value="<?php echo get_option(LogHeroPluginSettings::$apiEndpointOptionName); ?>"
+    />
     <?php
 }

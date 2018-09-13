@@ -6,7 +6,7 @@ License URI: https://opensource.org/licenses/MIT
 Tags: SEO, Log Files, Crawlers, Log Analysis, Search Engine Bots, Logs
 Requires at least: 3.6
 Tested up to: 4.9.6
-Stable tag: 0.2.2
+Stable tag: 0.2.3
 Requires PHP: 5.2.4
 
 Analyze how search engines and other bots crawl and understand your web page. The official PHP Wordpress plugin for [log-hero.com](https://log-hero.com).
@@ -100,6 +100,12 @@ You'll find answers to many of your questions on [log-hero.com](https://log-hero
 
 == Changelog ==
 
+= [0.2.3] =
+= Added =
+* Redis log buffer as an alternative to the file log buffer
+* Option to disable flush of log events
+* Added prefix to plugin options to avoid name collisions
+
 = [0.2.2] =
 = Added =
 * Admin error message if plugin cannot write to log buffer
@@ -114,6 +120,9 @@ You'll find answers to many of your questions on [log-hero.com](https://log-hero
 * Option to switch from asynchronous mode to synchronous mode
 
 == Upgrade Notice ==
+
+= [0.2.3] =
+Added Redis log buffer as an alternative to the file log buffer, added prefix to plugin options to avoid name collisions.
 
 = [0.2.2] =
 Evaluation of IP ranges to improve bot detection, send protocol version (http or https), improved error handling and reporting.

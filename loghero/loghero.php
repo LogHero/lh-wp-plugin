@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: LogHero Client
-Version:     0.2.2
+Version:     0.2.3
 Description: Analyze how search engines and other bots crawl and understand your web page. The official PHP Wordpress plugin for log-hero.com.
 Author:      Kay Wolter
 Author URI:  https://log-hero.com/
@@ -51,7 +51,7 @@ if (!class_exists( 'LogHeroClient_Plugin')) {
                     LogHeroGlobals::Instance()->refreshAPIKey($apiKeyFromDb);
                     $this->initialize();
                 }
-                self::refreshAPISettings();
+                self::refreshPluginSettings();
             }
             catch (PermissionDeniedException $e) {
             }
@@ -64,10 +64,9 @@ if (!class_exists( 'LogHeroClient_Plugin')) {
             return self::$Instance;
         }
 
-        public static function refreshAPISettings() {
-            $apiEndpointFromDb = get_option('api_endpoint');
-            $apiSettings = new \LogHero\Wordpress\LogHeroAPISettings();
-            $apiSettings->setAPILogPackageEndpoint($apiEndpointFromDb);
+        public static function refreshPluginSettings() {
+            $pluginSettings = new LogHeroPluginSettings(LogHeroPluginClient::createSettingsStorage());
+            $pluginSettings->flushToSettingsStorage();
         }
 
         protected function flushEndpoint() {
@@ -78,7 +77,7 @@ if (!class_exists( 'LogHeroClient_Plugin')) {
         }
 
         private function initialize() {
-            $this->logHeroClient = new LogHeroPluginClient(new LogHeroAPISettings(), $this->flushEndpoint());
+            $this->logHeroClient = new LogHeroPluginClient($this->flushEndpoint());
             add_action('shutdown', array($this->logHeroClient, 'submitLogEvent'));
         }
     }

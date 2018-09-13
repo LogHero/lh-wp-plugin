@@ -1,71 +1,29 @@
 <?php
 namespace LogHero\Wordpress\Test;
 use \LogHero\Wordpress\LogHeroAPISettings;
+use LogHero\Wordpress\LogHeroPluginSettings;
 
 
 class LogHeroAPISettingsTest extends \WP_UnitTestCase {
-    private $devSettingsFilename;
 
     public function setUp() {
-        $this->devSettingsFilename = __DIR__ . '/logs/dev.loghero.io.json';
-    }
-
-    public function tearDown() {
-        if(file_exists($this->devSettingsFilename)) {
-            unlink($this->devSettingsFilename);
-        }
+        update_option(LogHeroPluginSettings::$apiEndpointOptionName, null);
     }
 
     public function testProvideDefaultSettings() {
-        $settings = new LogHeroAPISettings($this->devSettingsFilename);
-        static::assertEquals('https://api.loghero.io/logs/', $settings->getAPILogPackageEndpoint());
+        $settings = new LogHeroAPISettings(new LogHeroPluginSettings());
+        static::assertEquals('https://api.loghero.io/logs/', $settings->getLogPackageEndpoint());
     }
 
     public function testProvideCustomizedSettings() {
-        $settings = new LogHeroAPISettings($this->devSettingsFilename);
-        $settings->setAPILogPackageEndpoint('https://test.loghero.io/logs/');
-        static::assertEquals('https://test.loghero.io/logs/', $settings->getAPILogPackageEndpoint());
+        update_option(LogHeroPluginSettings::$apiEndpointOptionName, 'https://test.loghero.io/logs/');
+        $settings = new LogHeroAPISettings(new LogHeroPluginSettings());
+        static::assertEquals('https://test.loghero.io/logs/', $settings->getLogPackageEndpoint());
     }
 
-    public function testPersistCustomizedSettingsInDevSettingsFile() {
-        $settings = new LogHeroAPISettings($this->devSettingsFilename);
-        $settings->setAPILogPackageEndpoint('https://test.loghero.io/logs/');
-        $this->assertEndpointInDevSettingsFile('https://test.loghero.io/logs/');
-        $settingsReinstantiated = new LogHeroAPISettings($this->devSettingsFilename);
-        static::assertEquals('https://test.loghero.io/logs/', $settingsReinstantiated->getAPILogPackageEndpoint());
-        $settingsReinstantiated->setAPILogPackageEndpoint('https://development.loghero.io/logs/');
-        $this->assertEndpointInDevSettingsFile('https://development.loghero.io/logs/');
-        $settingsReinstantiated = new LogHeroAPISettings($this->devSettingsFilename);
-        static::assertEquals('https://development.loghero.io/logs/', $settingsReinstantiated->getAPILogPackageEndpoint());
-    }
-
-    public function testHandleParseErrors() {
-        file_put_contents($this->devSettingsFilename, 'NO_JSON');
-        $settings = new LogHeroAPISettings($this->devSettingsFilename);
-        static::assertEquals('https://api.loghero.io/logs/', $settings->getAPILogPackageEndpoint());
-    }
-
-    public function testHandleEmptyJson() {
-        file_put_contents($this->devSettingsFilename, '{}');
-        $settings = new LogHeroAPISettings($this->devSettingsFilename);
-        static::assertEquals('https://api.loghero.io/logs/', $settings->getAPILogPackageEndpoint());
-    }
-
-    public function testUseDefaultIfDevSettingsEmpty() {
-        file_put_contents($this->devSettingsFilename, '{"apiLogPackageEndpoint": ""}');
-        $settings = new LogHeroAPISettings($this->devSettingsFilename);
-        static::assertEquals('https://api.loghero.io/logs/', $settings->getAPILogPackageEndpoint());
-    }
-
-    public function testNoDevSettingsFileIfParametersAreNotDefined() {
-        $settings = new LogHeroAPISettings($this->devSettingsFilename);
-        $settings->setAPILogPackageEndpoint('');
-        static::assertFileNotExists($this->devSettingsFilename);
-    }
-
-    private function assertEndpointInDevSettingsFile($expectedEndpoint) {
-        $jsonString = file_get_contents($this->devSettingsFilename);
-        $json = json_decode($jsonString, true);
-        static::assertEquals($json['apiLogPackageEndpoint'], $expectedEndpoint);
+    public function testProvideApiKey() {
+        update_option(LogHeroPluginSettings::$apiKeyOptionName, 'SOME_API_KEY');
+        $settings = new LogHeroAPISettings(new LogHeroPluginSettings());
+        static::assertEquals('SOME_API_KEY', $settings->getKey());
     }
 }
