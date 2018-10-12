@@ -208,7 +208,7 @@ class LogHeroPluginTest extends \WP_UnitTestCase {
     public function testUseSyncTransportIfConfigured() {
         $this->setupServerGlobal('/page-url');
         $this->fillUpFileLogBuffer();
-        update_option('use_sync_transport', true);
+        update_option(LogHeroPluginSettings::$useSyncTransportOptionName, true);
         $plugin = new LogHero_PluginTestImpl($this->apiAccessStub);
         $this->apiAccessStub
             ->expects(static::once())
@@ -303,7 +303,7 @@ class LogHeroPluginTest extends \WP_UnitTestCase {
     }
 
     public function testInitializeEmptyPluginFromScratch() {
-        update_option('api_key', null);
+        update_option(LogHeroPluginSettings::$apiKeyOptionName, null);
         file_put_contents($this->settingsFileLocation, '{}');
         new LogHero_PluginTestImpl();
     }

@@ -6,7 +6,7 @@ use \LogHero\Client\APISettingsDefault;
 class LogHeroAPISettings extends APISettingsDefault {
     private $pluginSettings;
 
-    public function __construct($pluginSettings) {
+    public function __construct(LogHeroPluginSettings $pluginSettings) {
         $this->pluginSettings = $pluginSettings;
     }
 
