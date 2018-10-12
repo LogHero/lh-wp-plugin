@@ -100,6 +100,11 @@ You'll find answers to many of your questions on [log-hero.com](https://log-hero
 
 == Changelog ==
 
+= [0.2.4] =
+= Added =
+* Limit batch size of buffered log events (split into multiple batches if number of buffered log events exceeds limit).
+* Fix custom API settings (did not affect the WordPress plugin).
+
 = [0.2.3] =
 = Added =
 * Redis log buffer as an alternative to the file log buffer
@@ -120,6 +125,9 @@ You'll find answers to many of your questions on [log-hero.com](https://log-hero
 * Option to switch from asynchronous mode to synchronous mode
 
 == Upgrade Notice ==
+
+= [0.2.4] =
+Limit batch size of buffered log events
 
 = [0.2.3] =
 Added Redis log buffer as an alternative to the file log buffer, added prefix to plugin options to avoid name collisions.
