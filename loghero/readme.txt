@@ -6,7 +6,7 @@ License URI: https://opensource.org/licenses/MIT
 Tags: SEO, Log Files, Crawlers, Log Analysis, Search Engine Bots, Logs
 Requires at least: 3.6
 Tested up to: 4.9.6
-Stable tag: 0.2.3
+Stable tag: 0.2.4
 Requires PHP: 5.2.4
 
 Analyze how search engines and other bots crawl and understand your web page. The official PHP Wordpress plugin for [log-hero.com](https://log-hero.com).
