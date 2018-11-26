@@ -24,7 +24,7 @@ class LogHeroGlobals {
     }
 
     public function getClientId() {
-        return 'Wordpress Plugin loghero/wp@0.2.4';
+        return 'Wordpress Plugin loghero/wp@0.2.5';
     }
 
     public function setLogEventsBufferFilename($logEventsBufferFile) {
