@@ -6,7 +6,7 @@ License URI: https://opensource.org/licenses/MIT
 Tags: SEO, Log Files, Crawlers, Log Analysis, Search Engine Bots, Logs
 Requires at least: 3.6
 Tested up to: 4.9.6
-Stable tag: 0.2.4
+Stable tag: 0.2.5
 Requires PHP: 5.2.4
 
 Analyze how search engines and other bots crawl and understand your web page. The official PHP Wordpress plugin for [log-hero.com](https://log-hero.com).
@@ -100,6 +100,10 @@ You'll find answers to many of your questions on [log-hero.com](https://log-hero
 
 == Changelog ==
 
+= [0.2.5] =
+= Added =
+* Support for IPv6
+
 = [0.2.4] =
 = Added =
 * Limit batch size of buffered log events (split into multiple batches if number of buffered log events exceeds limit).
@@ -125,6 +129,9 @@ You'll find answers to many of your questions on [log-hero.com](https://log-hero
 * Option to switch from asynchronous mode to synchronous mode
 
 == Upgrade Notice ==
+
+= [0.2.5] =
+Added support for IPv6
 
 = [0.2.4] =
 Limit batch size of buffered log events
