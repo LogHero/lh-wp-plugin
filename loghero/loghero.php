@@ -1,12 +1,19 @@
 <?php
 /*
-Plugin Name: LogHero Client
-Version:     0.2.5
-Description: Analyze how search engines and other bots crawl and understand your web page. The official PHP Wordpress plugin for log-hero.com.
-Author:      Kay Wolter
-Author URI:  https://log-hero.com/
-License:     MIT
+Plugin Name:       LogHero Client
+Plugin URI:        https://wordpress.org/plugins/loghero/
+Description:       Analyze how search engines and other bots crawl and understand your web page. The official WordPress plugin for log-hero.com.
+Version:           0.3.0
+Requires at least: 6.0
+Requires PHP:      7.4
+Author:            Kay Wolter
+Author URI:        https://log-hero.com/
+Text Domain:       loghero
+License:           MIT
+License URI:       https://opensource.org/licenses/MIT
+*/
 
+/*
 Copyright (c) 2018 Cross Platform Solutions GmbH
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
