@@ -5,6 +5,10 @@ use \LogHero\Wordpress\LogHero_Plugin;
 use \LogHero\Wordpress\LogHeroGlobals;
 use \LogHero\Client\PermissionDeniedException;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 
 class LogHeroAdmin {
     public static $settingsGroup = 'loghero';
@@ -87,14 +91,16 @@ class LogHeroAdmin {
             static::$disableTransportOptionLabel,
             '\LogHero\Wordpress\LogHeroAdmin::disableTransportInputRenderer',
             static::$settingsGroup,
-            $settingsSection
+            $settingsSection,
+            '\LogHero\Wordpress\LogHeroAdmin::sanitizeCheckboxOption'
         );
         static::addFieldToSection(
             LogHeroPluginSettings::$useSyncTransportOptionName,
             static::$useSyncTransportOptionLabel,
             '\LogHero\Wordpress\LogHeroAdmin::useSyncTransportInputRenderer',
             static::$settingsGroup,
-            $settingsSection
+            $settingsSection,
+            '\LogHero\Wordpress\LogHeroAdmin::sanitizeCheckboxOption'
         );
         static::addFieldToSection(
             LogHeroPluginSettings::$redisUrlOptionName,
@@ -112,7 +118,7 @@ class LogHeroAdmin {
         );
     }
 
-    public static function addFieldToSection($fieldName, $fieldLabel, $inputRenderer, $settingsGroup, $settingsSection) {
+    public static function addFieldToSection($fieldName, $fieldLabel, $inputRenderer, $settingsGroup, $settingsSection, $sanitizeCallback = '\LogHero\Wordpress\LogHeroAdmin::sanitizeTextOption') {
         add_settings_field(
             $fieldName,
             $fieldLabel,
@@ -120,16 +126,29 @@ class LogHeroAdmin {
             $settingsGroup,
             $settingsSection
         );
-        register_setting($settingsGroup, $fieldName); # TODO Use sanitize callback
+        register_setting($settingsGroup, $fieldName, array(
+            'sanitize_callback' => $sanitizeCallback
+        ));
+    }
+
+    public static function sanitizeTextOption($value) {
+        if ($value === null) {
+            return '';
+        }
+        return sanitize_text_field($value);
+    }
+
+    public static function sanitizeCheckboxOption($value) {
+        return $value ? 1 : 0;
     }
 
     public static function apiKeyInputRenderer() {
         ?>
         <input
             type="text"
-            name="<?php echo LogHeroPluginSettings::$apiKeyOptionName ?>"
-            id="<?php echo LogHeroPluginSettings::$apiKeyOptionName ?>"
-            value="<?php echo get_option(LogHeroPluginSettings::$apiKeyOptionName); ?>"
+            name="<?php echo esc_attr(LogHeroPluginSettings::$apiKeyOptionName) ?>"
+            id="<?php echo esc_attr(LogHeroPluginSettings::$apiKeyOptionName) ?>"
+            value="<?php echo esc_attr(get_option(LogHeroPluginSettings::$apiKeyOptionName)); ?>"
         />
         <?php
     }
@@ -138,9 +157,9 @@ class LogHeroAdmin {
         ?>
         <input
             type="text"
-            name="<?php echo LogHeroPluginSettings::$redisUrlOptionName ?>"
-            id="<?php echo LogHeroPluginSettings::$redisUrlOptionName ?>"
-            value="<?php echo get_option(LogHeroPluginSettings::$redisUrlOptionName); ?>"
+            name="<?php echo esc_attr(LogHeroPluginSettings::$redisUrlOptionName) ?>"
+            id="<?php echo esc_attr(LogHeroPluginSettings::$redisUrlOptionName) ?>"
+            value="<?php echo esc_attr(get_option(LogHeroPluginSettings::$redisUrlOptionName)); ?>"
         />
         <p class="description">Use Redis store to buffer log events.</p>
         <?php
@@ -150,19 +169,19 @@ class LogHeroAdmin {
         ?>
         <input
             type="text"
-            name="<?php echo LogHeroPluginSettings::$redisKeyPrefixOptionName ?>"
-            id="<?php echo LogHeroPluginSettings::$redisKeyPrefixOptionName ?>"
-            value="<?php echo get_option(LogHeroPluginSettings::$redisKeyPrefixOptionName); ?>"
+            name="<?php echo esc_attr(LogHeroPluginSettings::$redisKeyPrefixOptionName) ?>"
+            id="<?php echo esc_attr(LogHeroPluginSettings::$redisKeyPrefixOptionName) ?>"
+            value="<?php echo esc_attr(get_option(LogHeroPluginSettings::$redisKeyPrefixOptionName)); ?>"
         />
-        <p class="description">Redis key used to store buffered log events (default: "<?php echo LogHeroPluginSettings::buildDefaultRedisKeyPrefix(get_option(LogHeroPluginSettings::$apiKeyOptionName)); ?>").</p>
+        <p class="description">Redis key used to store buffered log events (default: "<?php echo esc_html(LogHeroPluginSettings::buildDefaultRedisKeyPrefix(get_option(LogHeroPluginSettings::$apiKeyOptionName))); ?>").</p>
         <?php
     }
 
     public static function useSyncTransportInputRenderer() {
         ?>
         <input
-            name="<?php echo LogHeroPluginSettings::$useSyncTransportOptionName ?>"
-            id="<?php echo LogHeroPluginSettings::$useSyncTransportOptionName ?>"
+            name="<?php echo esc_attr(LogHeroPluginSettings::$useSyncTransportOptionName) ?>"
+            id="<?php echo esc_attr(LogHeroPluginSettings::$useSyncTransportOptionName) ?>"
             type="checkbox"
             value="1"
             class="code"
@@ -176,8 +195,8 @@ class LogHeroAdmin {
     public static function disableTransportInputRenderer() {
         ?>
         <input
-            name="<?php echo LogHeroPluginSettings::$disableTransportOptionName ?>"
-            id="<?php echo LogHeroPluginSettings::$disableTransportOptionName ?>"
+            name="<?php echo esc_attr(LogHeroPluginSettings::$disableTransportOptionName) ?>"
+            id="<?php echo esc_attr(LogHeroPluginSettings::$disableTransportOptionName) ?>"
             type="checkbox"
             value="1"
             class="code"
@@ -190,9 +209,10 @@ class LogHeroAdmin {
 
     public static function setupAdminNotices(){
         $currentApiKey = get_option(LogHeroPluginSettings::$apiKeyOptionName);
+        $settingsPageUrl = esc_url(admin_url('options-general.php?page=' . static::$settingsGroup));
         if (!$currentApiKey) {
             echo '<div class="notice notice-warning is-dismissible">
-                 <p>Your LogHero API key is not setup. Please go to the <a href="/wp-admin/options-general.php?page=loghero">LogHero settings page</a> and enter the API key retrieved from <a target="_blank" href="https://log-hero.com">log-hero.com</a>.</p>
+                 <p>Your LogHero API key is not setup. Please go to the <a href="' . $settingsPageUrl . '">LogHero settings page</a> and enter the API key retrieved from <a target="_blank" href="https://log-hero.com">log-hero.com</a>.</p>
              </div>';
         }
         try {
@@ -201,16 +221,16 @@ class LogHeroAdmin {
                 echo '<div class="notice notice-warning is-dismissible">
                  <p>LogHero asynchronous flush failed! This is most likely caused by your server configuration which might block requests made from your backend.
                  The log events are currently flushed synchronously.
-                 To suppress this warning, either update your server configuration or go to the <a href="/wp-admin/options-general.php?page=loghero">LogHero settings page</a> and activate the "' . static::$useSyncTransportOptionLabel . '" option.
+                 To suppress this warning, either update your server configuration or go to the <a href="' . $settingsPageUrl . '">LogHero settings page</a> and activate the "' . esc_html(static::$useSyncTransportOptionLabel) . '" option.
                  For more information visit <a target="_blank" href="https://log-hero.com/docs/asynchronous-flush-failed/">https://log-hero.com/docs/asynchronous-flush-failed/</a>.</p>
-                 <p>Error message: ' . $asyncFlushError . '</p>
+                 <p>Error message: ' . esc_html($asyncFlushError) . '</p>
              </div>';
             }
             $unexpectedError = LogHeroGlobals::Instance()->errors()->getError('unexpected');
             if ($unexpectedError) {
                 echo '<div class="notice notice-warning is-dismissible">
-                     <p>Your LogHero plugin does not work propery!</p>
-                     <p>Error message: ' . $unexpectedError . '</p>
+                     <p>Your LogHero plugin does not work properly!</p>
+                     <p>Error message: ' . esc_html($unexpectedError) . '</p>
                  </div>';
                 LogHeroGlobals::Instance()->errors()->resolveError('unexpected');
             }
@@ -220,7 +240,7 @@ class LogHeroAdmin {
                 echo '<div class="notice notice-error is-dismissible">
                  <p>Your LogHero plugin cannot write to the "logs" folder (permission denied). Please set access rights properly or use the Redis log buffer with synchronous flush.
                  For more information visit <a target="_blank" href="https://log-hero.com/docs/permission-denied">https://log-hero.com/docs/permission-denied</a>.</p>
-                 <p>Error message: ' . $permissionDeniedError->getMessage() . '</p>
+                 <p>Error message: ' . esc_html($permissionDeniedError->getMessage()) . '</p>
                 </div>';
             }
         }

@@ -40,6 +40,10 @@ namespace LogHero\Wordpress;
 use \LogHero\Client\APIKeyUndefinedException;
 use LogHero\Client\PermissionDeniedException;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 
 if (!class_exists( 'LogHeroClient_Plugin')) {
     require_once __DIR__ . '/autoload.php';

@@ -1,6 +1,10 @@
 <?php
 namespace LogHero\Wordpress;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 function loghero_migrate_option($fromOptionName, $toOptionName) {
     $currentValue = get_option($toOptionName);
     if (!$currentValue) {
