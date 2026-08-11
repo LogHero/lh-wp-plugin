@@ -129,6 +129,9 @@ You'll find answers to many of your questions on [log-hero.com](https://log-hero
 == Changelog ==
 
 = [0.3.0] =
+= Fixed =
+* Log events are delivered again. The API endpoint the plugin shipped with, api.loghero.io, no longer exists, so no data could reach Log Hero. The plugin now talks to the current endpoint.
+
 = Changed =
 * Declared compatibility with current WordPress and PHP versions. The plugin now requires WordPress 6.0 or newer and PHP 7.4 or newer.
 * Documented the Log Hero service as an external service, including the exact data transmitted for each request and a link to the privacy policy.
@@ -165,7 +168,7 @@ You'll find answers to many of your questions on [log-hero.com](https://log-hero
 == Upgrade Notice ==
 
 = [0.3.0] =
-Compatibility with current WordPress and PHP versions. Now requires WordPress 6.0 and PHP 7.4 or newer. Adds full documentation of the data transmitted to the Log Hero service.
+Important fix: earlier versions sent log events to an endpoint that no longer exists, so no data arrived. This release restores delivery. It also requires WordPress 6.0 and PHP 7.4 or newer and documents the data transmitted to the Log Hero service.
 
 = [0.2.5] =
 Added support for IPv6
