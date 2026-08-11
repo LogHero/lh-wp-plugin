@@ -4,3 +4,8 @@
 *.log
 *.retry
 *.DS_Store
+
+# Laufzeitdaten des Log-Puffers, gehoeren nicht in die Versionierung
+loghero/logs/*
+!loghero/logs/.gitkeep
+!loghero/logs/.htaccess

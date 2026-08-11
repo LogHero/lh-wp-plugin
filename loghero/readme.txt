@@ -129,7 +129,14 @@ You'll find answers to many of your questions on [log-hero.com](https://log-hero
 == Changelog ==
 
 = [0.3.0] =
+= Security =
+* Removed flush.php, a directly accessible PHP file in the plugin directory that ran without loading WordPress. Flushing is now a REST route, loghero/v1/flush, authenticated in its permission callback with a constant time token comparison.
+* All settings values are sanitized when saved and escaped when displayed. The developer endpoint field is restricted to http and https URLs.
+* Every plugin file now refuses to run when called directly.
+
 = Fixed =
+* The API endpoint on the developer settings page could never be saved. It was registered under its pre 0.2.3 name while the form posted the prefixed one, so WordPress discarded the value.
+* Admin notices linked to /wp-admin/ instead of the real admin URL, which was wrong on installations in a subdirectory.
 * Log events are delivered again. The API endpoint the plugin shipped with, api.loghero.io, no longer exists, so no data could reach Log Hero. The plugin now talks to the current endpoint.
 
 = Changed =

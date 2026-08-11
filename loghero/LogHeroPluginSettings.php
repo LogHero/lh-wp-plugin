@@ -4,6 +4,11 @@ namespace LogHero\Wordpress;
 use \LogHero\Client\LogTransportType;
 use LogHero\Client\RedisOptions;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+
 
 class LogHeroPluginSettings {
     public static $apiKeyOptionName = 'loghero_api_key';

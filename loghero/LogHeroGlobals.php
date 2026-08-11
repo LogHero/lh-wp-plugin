@@ -3,6 +3,11 @@
 namespace LogHero\Wordpress;
 use \LogHero\Client\LogHeroErrors;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+
 
 class LogHeroGlobals {
     private $logEventsBufferFile;

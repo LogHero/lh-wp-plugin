@@ -81,18 +81,18 @@ if (!class_exists( 'LogHeroClient_Plugin')) {
         }
 
         protected function flushEndpoint() {
-            # TODO Backslashes on Windows?
-            $absolutePluginDirectory = plugin_dir_path( __FILE__ );
-            $relativePluginDirectory = str_replace(ABSPATH, '/', $absolutePluginDirectory);
-            return get_home_url() . $relativePluginDirectory . 'flush.php';
+            return LogHeroFlushEndpoint::url();
         }
 
         private function initialize() {
-            $this->logHeroClient = new LogHeroPluginClient($this->flushEndpoint());
+            # No flush endpoint is passed here on purpose. Building it needs rest_url(),
+            # which cannot run this early, so the transport resolves it when it triggers.
+            $this->logHeroClient = new LogHeroPluginClient();
             add_action('shutdown', array($this->logHeroClient, 'submitLogEvent'));
         }
     }
 
+    LogHeroFlushEndpoint::setup();
     LogHero_Plugin::getInstance();
 
     if (is_admin()) {
