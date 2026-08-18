@@ -1,5 +1,10 @@
 <?php
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+
 require_once __DIR__ . '/sdk/autoload.php';
 
 spl_autoload_register(
@@ -13,7 +18,9 @@ spl_autoload_register(
                 'loghero\\wordpress\\logheropluginclient' => '/LogHeroPluginClient.php',
                 'loghero\\wordpress\\logheroglobals' => '/LogHeroGlobals.php',
                 'loghero\\wordpress\\logheroapisettings' => '/LogHeroAPISettings.php',
-                'loghero\\wordpress\\logheropluginsettings' => '/LogHeroPluginSettings.php'
+                'loghero\\wordpress\\logheropluginsettings' => '/LogHeroPluginSettings.php',
+                'loghero\\wordpress\\logheroflushendpoint' => '/LogHeroFlushEndpoint.php',
+                'loghero\\wordpress\\wordpressasynclogtransport' => '/WordPressAsyncLogTransport.php'
             );
         }
         $cn = strtolower($class);

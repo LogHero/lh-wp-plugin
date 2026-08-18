@@ -261,7 +261,7 @@ class LogHeroPluginTest extends \WP_UnitTestCase {
     }
 
     public function testCreateUrlForFlushEndpoint() {
-        static::assertEquals('http://example.org/var/www/html/wp-content/plugins/loghero/flush.php', $this->plugin->getFlushTriggerUrl());
+        static::assertEquals(rest_url('loghero/v1/flush'), $this->plugin->getFlushTriggerUrl());
     }
 
     /**

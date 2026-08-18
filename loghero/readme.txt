@@ -3,13 +3,13 @@ Contributors: loghero
 Donate link: https://log-hero.com
 License: MIT
 License URI: https://opensource.org/licenses/MIT
-Tags: SEO, Log Files, Crawlers, Log Analysis, Search Engine Bots, Logs
-Requires at least: 3.6
-Tested up to: 4.9.6
+Tags: seo, log files, crawlers, log analysis, bots
+Requires at least: 6.0
+Tested up to: 7.0
 Stable tag: 0.2.5
-Requires PHP: 5.2.4
+Requires PHP: 7.4
 
-Analyze how search engines and other bots crawl and understand your web page. The official PHP Wordpress plugin for [log-hero.com](https://log-hero.com).
+Analyze how search engines and other bots crawl your site. The official WordPress plugin for log-hero.com.
 
 == Description ==
 
@@ -23,7 +23,7 @@ His additional dimensions and metrics help you analyze the bot data even better.
 
 * Page path of your crawled sites (see how often a bot crawls sites).
 * User agent (how the bot identifies himself).
-* IP addresses (only for bots, so 100% GDPR and privacy compliant).
+* IP addresses (used to verify that a bot is who it claims to be; see "External services" below for exactly what this plugin transmits).
 * Sessions and users (monitor bots and their flow as if they were human visitors).
 * HTTP status codes (monitor status codes of individual sites, find broken links, redirect chains, server failures).
 * Download times (how long the bot needs to download your content).
@@ -61,6 +61,34 @@ Log Hero helps you to identify many issues concerning technical optimization of 
 * How long does the bot need to download the resources of my site?
 * How many users does my normal Google Analytics system not track because they have disabled the tracker or Javascript?
 * and much more. Visit [log-hero.com](https://log-hero.com)! for more information
+
+== External services ==
+
+This plugin relies on Log Hero, an external service operated by Cross Platform Solutions GmbH. The plugin has no function without it: its only purpose is to forward request data to that service, which then makes bot and crawler traffic visible in your analytics account.
+
+= What is sent, and when =
+
+The plugin registers a handler on the WordPress `shutdown` action. For **every** request served by your site -- from bots and from human visitors alike -- it collects the following data about that single request and transmits it to the Log Hero API at `https://api.loghero.io/logs/`:
+
+* The host name of your site.
+* The protocol used (http or https).
+* The requested path, including its query string.
+* The HTTP request method.
+* The HTTP status code your site returned.
+* The User-Agent header sent by the client.
+* The Referer header sent by the client, if present.
+* The IP address of the client.
+* The timestamp of the request.
+* The time your site needed to generate the response, in milliseconds.
+
+Filtering bots from human visitors happens on the Log Hero side, not in the plugin. The IP address of every visitor is therefore transmitted, not only that of bots. Depending on your jurisdiction, IP addresses may be personal data; if you are subject to the GDPR, transmitting them to a processor requires a legal basis and, as a rule, a data processing agreement with the operator. Please assess this for your own site before activating the plugin.
+
+Requests are buffered locally and sent in batches. No data is transmitted until you have entered a valid API key under Settings > LogHero.
+
+= Terms and privacy =
+
+* Service: [log-hero.com](https://log-hero.com)
+* Privacy policy: [https://log-hero.com/privacy-policy](https://log-hero.com/privacy-policy)
 
 == Bug reports ==
 
@@ -100,6 +128,22 @@ You'll find answers to many of your questions on [log-hero.com](https://log-hero
 
 == Changelog ==
 
+= [0.3.0] =
+= Security =
+* Removed flush.php, a directly accessible PHP file in the plugin directory that ran without loading WordPress. Flushing is now a REST route, loghero/v1/flush, authenticated in its permission callback with a constant time token comparison.
+* All settings values are sanitized when saved and escaped when displayed. The developer endpoint field is restricted to http and https URLs.
+* Every plugin file now refuses to run when called directly.
+
+= Fixed =
+* The API endpoint on the developer settings page could never be saved. It was registered under its pre 0.2.3 name while the form posted the prefixed one, so WordPress discarded the value.
+* Admin notices linked to /wp-admin/ instead of the real admin URL, which was wrong on installations in a subdirectory.
+* Log events are delivered again. The API endpoint the plugin shipped with, api.loghero.io, no longer exists, so no data could reach Log Hero. The plugin now talks to the current endpoint.
+
+= Changed =
+* Declared compatibility with current WordPress and PHP versions. The plugin now requires WordPress 6.0 or newer and PHP 7.4 or newer.
+* Documented the Log Hero service as an external service, including the exact data transmitted for each request and a link to the privacy policy.
+* Removed an inaccurate claim from the plugin description: IP addresses are transmitted for all requests, not only for bots.
+
 = [0.2.5] =
 = Added =
 * Support for IPv6
@@ -130,6 +174,9 @@ You'll find answers to many of your questions on [log-hero.com](https://log-hero
 
 == Upgrade Notice ==
 
+= [0.3.0] =
+Important fix: earlier versions sent log events to an endpoint that no longer exists, so no data arrived. This release restores delivery. It also requires WordPress 6.0 and PHP 7.4 or newer and documents the data transmitted to the Log Hero service.
+
 = [0.2.5] =
 Added support for IPv6
 
@@ -148,7 +195,7 @@ Added workaround for sites using Cloudflare, improved error handling and reporti
 == Screenshots ==
 
 1. Comparing hits from a Google bot vs. a Bing bot.
-2. Entering the API key in the Wordpress backend.
+2. Entering the API key in the WordPress backend.
 3. Seeing real-time data of the Log Hero plugin in Google Analytics.
 4. Status code report in Google Analytics.
 5. Bot report in Google Analytics by page.
