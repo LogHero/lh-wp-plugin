@@ -56,8 +56,8 @@ class WordPressAsyncLogTransport extends AsyncLogTransport {
             'user-agent' => $this->clientUserAgent
         ));
         if (is_wp_error($response)) {
-            throw new APIAccessException(
-                'Call to URL ' . $this->flushEndpointUrl . ' failed; Message: ' . $response->get_error_message()
+            throw new \LogHero\Client\AsyncFlushFailedException(
+                'Async flush trigger call to URL ' . $this->flushEndpointUrl . ' failed; Message: ' . $response->get_error_message()
             );
         }
     }
