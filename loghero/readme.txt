@@ -50,11 +50,8 @@ Everything below is included, there is no paid tier holding features back.
 * Response times, so you can see how long your site kept a bot waiting.
 * The request method.
 * Referrer and channel, to see how bots reached a page.
-* Device category, for example whether Google crawled you with its mobile or its desktop bot.
-* Location.
 * Sessions and users, so you can follow a bot through your site the way you would a human visitor.
-* Spam detection, to see how much of your automated traffic is junk.
-* Attack detection, so you hear about it when someone probes your site.
+* Spam bots, marked as such, so you can tell junk traffic apart from the crawlers you care about.
 
 = Analysis in Google Analytics 4 =
 
@@ -73,7 +70,6 @@ Log Hero helps you to identify many issues concerning technical optimization of 
 * Which orphan pages has my site that are never crawled?
 * Which status codes does my site return to search engines?
 * Are my robots.txt and sitemap.xml crawled by search engine bots?
-* Do search engine bots crawl my page with a desktop or mobile device?
 * How long does the bot need to download the resources of my site?
 * Which AI crawlers read my content, and how much of my traffic do they account for?
 * How much traffic never reaches my analytics because it does not run JavaScript?
