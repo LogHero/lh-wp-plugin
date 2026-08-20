@@ -6,7 +6,7 @@ License URI: https://opensource.org/licenses/MIT
 Tags: seo, log files, crawlers, log analysis, bots
 Requires at least: 6.0
 Tested up to: 7.0
-Stable tag: 0.2.5
+Stable tag: 0.3.0
 Requires PHP: 7.4
 
 Analyze how search engines and other bots crawl your site. The official WordPress plugin for log-hero.com.
@@ -194,8 +194,8 @@ Added workaround for sites using Cloudflare, improved error handling and reporti
 
 == Screenshots ==
 
-1. Comparing hits from a Google bot vs. a Bing bot.
-2. Entering the API key in the WordPress backend.
-3. Seeing real-time data of the Log Hero plugin in Google Analytics.
-4. Status code report in Google Analytics.
-5. Bot report in Google Analytics by page.
+1. Bot activity at a glance: hits, error rate, number of active bots and average response time, with daily traffic broken down per bot.
+2. Every bot that crawled the site, with its share of traffic, the mix of status codes it received and how fast your site answered it.
+3. The paths bots crawl most, next to the errors they ran into.
+4. The same data inside Google Analytics, as a report by bot, landing page and status code.
+5. Plugin settings: enter the API key you received from log-hero.com.
