@@ -1,6 +1,10 @@
 <?php
 use LogHero\Wordpress\LogHeroPluginSettings;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 function loghero_dev_options_page()
 {
     ?>
@@ -28,7 +32,10 @@ function loghero_dev_options_page()
 add_action('admin_init', 'loghero_dev_admin_init');
 function loghero_dev_admin_init() {
     $settings_group = 'loghero-dev';
-    $setting_name = 'api_endpoint';
+    # LOG-182 introduced the loghero_ prefix. The input below has always posted the
+    # prefixed name, so registering the unprefixed one meant the value was silently
+    # discarded by options.php as an unregistered setting.
+    $setting_name = LogHeroPluginSettings::$apiEndpointOptionName;
 
     $settings_section = 'loghero_dev';
     $page = $settings_group;
@@ -48,7 +55,16 @@ function loghero_dev_admin_init() {
         $settings_section
     );
 
-    register_setting($page, $setting_name);
+    register_setting($page, $setting_name, array(
+        'sanitize_callback' => 'loghero_sanitize_api_endpoint'
+    ));
+}
+
+function loghero_sanitize_api_endpoint($value) {
+    if (!$value) {
+        return '';
+    }
+    return esc_url_raw(trim($value), array('http', 'https'));
 }
 
 add_action('admin_menu', 'loghero_dev_admin_add_page');
@@ -68,9 +84,9 @@ function loghero_api_endpoint_input_renderer() {
     ?>
     <input
         type="text"
-        name="<?php echo LogHeroPluginSettings::$apiEndpointOptionName ?>"
-        id="<?php echo LogHeroPluginSettings::$apiEndpointOptionName ?>"
-        value="<?php echo get_option(LogHeroPluginSettings::$apiEndpointOptionName); ?>"
+        name="<?php echo esc_attr(LogHeroPluginSettings::$apiEndpointOptionName) ?>"
+        id="<?php echo esc_attr(LogHeroPluginSettings::$apiEndpointOptionName) ?>"
+        value="<?php echo esc_attr(get_option(LogHeroPluginSettings::$apiEndpointOptionName)); ?>"
     />
     <?php
 }

@@ -1,12 +1,19 @@
 <?php
 /*
-Plugin Name: LogHero Client
-Version:     0.2.5
-Description: Analyze how search engines and other bots crawl and understand your web page. The official PHP Wordpress plugin for log-hero.com.
-Author:      Kay Wolter
-Author URI:  https://log-hero.com/
-License:     MIT
+Plugin Name:       LogHero Client
+Plugin URI:        https://wordpress.org/plugins/loghero/
+Description:       Analyze how search engines and other bots crawl and understand your web page. The official WordPress plugin for log-hero.com.
+Version:           0.3.0
+Requires at least: 6.0
+Requires PHP:      7.4
+Author:            Kay Wolter
+Author URI:        https://log-hero.com/
+Text Domain:       loghero
+License:           MIT
+License URI:       https://opensource.org/licenses/MIT
+*/
 
+/*
 Copyright (c) 2018 Cross Platform Solutions GmbH
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -32,6 +39,10 @@ SOFTWARE.
 namespace LogHero\Wordpress;
 use \LogHero\Client\APIKeyUndefinedException;
 use LogHero\Client\PermissionDeniedException;
+
+if (!defined('ABSPATH')) {
+    exit;
+}
 
 
 if (!class_exists( 'LogHeroClient_Plugin')) {
@@ -70,18 +81,18 @@ if (!class_exists( 'LogHeroClient_Plugin')) {
         }
 
         protected function flushEndpoint() {
-            # TODO Backslashes on Windows?
-            $absolutePluginDirectory = plugin_dir_path( __FILE__ );
-            $relativePluginDirectory = str_replace(ABSPATH, '/', $absolutePluginDirectory);
-            return get_home_url() . $relativePluginDirectory . 'flush.php';
+            return LogHeroFlushEndpoint::url();
         }
 
         private function initialize() {
-            $this->logHeroClient = new LogHeroPluginClient($this->flushEndpoint());
+            # No flush endpoint is passed here on purpose. Building it needs rest_url(),
+            # which cannot run this early, so the transport resolves it when it triggers.
+            $this->logHeroClient = new LogHeroPluginClient();
             add_action('shutdown', array($this->logHeroClient, 'submitLogEvent'));
         }
     }
 
+    LogHeroFlushEndpoint::setup();
     LogHero_Plugin::getInstance();
 
     if (is_admin()) {

@@ -15,6 +15,10 @@ use LogHero\Wordpress\LogHeroPluginSettings;
 use LogHero\Client\FileStorage;
 use Predis\Client;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
 
 class LogHeroPluginClient {
     private $logEventFactory;
@@ -43,7 +47,7 @@ class LogHeroPluginClient {
             );
         }
         else {
-            $this->logTransport = new AsyncLogTransport(
+            $this->logTransport = new WordPressAsyncLogTransport(
                 $this->createLogBuffer(),
                 $apiAccess,
                 $clientId,

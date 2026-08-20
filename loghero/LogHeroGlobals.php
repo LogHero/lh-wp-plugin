@@ -3,6 +3,11 @@
 namespace LogHero\Wordpress;
 use \LogHero\Client\LogHeroErrors;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+
 
 class LogHeroGlobals {
     private $logEventsBufferFile;
@@ -24,7 +29,7 @@ class LogHeroGlobals {
     }
 
     public function getClientId() {
-        return 'Wordpress Plugin loghero/wp@0.2.5';
+        return 'WordPress Plugin loghero/wp@0.3.0';
     }
 
     public function setLogEventsBufferFilename($logEventsBufferFile) {

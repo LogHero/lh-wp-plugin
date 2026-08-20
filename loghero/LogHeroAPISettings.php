@@ -2,6 +2,11 @@
 namespace LogHero\Wordpress;
 use \LogHero\Client\APISettingsDefault;
 
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+
 
 class LogHeroAPISettings extends APISettingsDefault {
     private $pluginSettings;
