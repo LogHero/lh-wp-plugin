@@ -135,7 +135,7 @@ For more information about logs or this plugin, visit the [Log-Hero](https://log
 
 1. Click on Settings > LogHero.
 2. Now you have to enter the API key you received in the sign-up flow on [log-hero.com](https://log-hero.com). If you don't have an API key, get one for free on [https://log-hero.com](https://log-hero.com)!
-3. You're done. Bot traffic starts showing up in the Log Hero dashboard in the Keyword Hero app, and in your Google Analytics 4 property.
+3. You're done. Bot traffic starts showing up in the Log Hero dashboard in the Keyword Hero app, and in the Google Analytics 4 property named "Log Hero - your-domain.com".
 
 If you have any problems, write our support team.
 
