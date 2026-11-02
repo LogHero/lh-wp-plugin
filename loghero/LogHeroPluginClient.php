@@ -8,11 +8,8 @@ use LogHero\Client\PermissionDeniedException;
 use LogHero\Client\RedisLogBuffer;
 use LogHero\Client\LogTransport;
 use LogHero\Client\DisabledLogTransport;
-use LogHero\Client\AsyncLogTransport;
-use LogHero\Client\AsyncFlushFailedException;
 use LogHero\Client\LogTransportType;
 use LogHero\Wordpress\LogHeroPluginSettings;
-use LogHero\Client\FileStorage;
 use Predis\Client;
 
 if (!defined('ABSPATH')) {
@@ -26,9 +23,9 @@ class LogHeroPluginClient {
     private $apiSettings;
     protected $logTransport;
 
-    public function __construct($flushEndpoint = null, $apiAccess = null) {
+    public function __construct($apiAccess = null) {
         $clientId = LogHeroGlobals::Instance()->getClientId();
-        $this->settings = new LogHeroPluginSettings(static::createSettingsStorage());
+        $this->settings = new LogHeroPluginSettings();
         $this->apiSettings = new LogHeroAPISettings($this->settings);
         if (!$apiAccess) {
             $apiAccess = new APIAccess($clientId, $this->apiSettings);
@@ -47,12 +44,9 @@ class LogHeroPluginClient {
             );
         }
         else {
-            $this->logTransport = new WordPressAsyncLogTransport(
+            $this->logTransport = new WordPressDeferredLogTransport(
                 $this->createLogBuffer(),
-                $apiAccess,
-                $clientId,
-                $this->apiSettings->getKey(),
-                $flushEndpoint
+                $apiAccess
             );
         }
     }
@@ -65,12 +59,9 @@ class LogHeroPluginClient {
             }
             $this->logTransport->submit($logEvent);
         }
-        catch(AsyncFlushFailedException $e) {
-            LogHeroGlobals::Instance()->errors()->writeError('async-flush', $e);
-        }
         catch(\Exception $e) {
             try {
-                LogHeroGlobals::Instance()->errors()->writeError('unexpected', $e);
+                LogHeroGlobals::Instance()->errors()->writeError('unexpected', $e->getMessage());
             }
             catch(PermissionDeniedException $permissionDeniedError) {
                 throw $e;
@@ -78,21 +69,19 @@ class LogHeroPluginClient {
         }
     }
 
-    public function flush($token) {
-        if ($token !== $this->apiSettings->getKey()) {
-            throw new InvalidTokenException('Token is invalid');
+    /**
+     * Sends everything in the buffer right away. Used by the WP-Cron events.
+     * Does nothing when the log transport is disabled.
+     */
+    public function flushBuffer() {
+        if ($this->settings->getTransportType() === LogTransportType::DISABLED) {
+            return;
         }
-        if ($this->settings->getTransportType() !== LogTransportType::ASYNC) {
-            throw new InvalidTransportTypeException('Flush action needs async transport type');
+        if ($this->logTransport instanceof WordPressDeferredLogTransport) {
+            $this->logTransport->flushNow();
+            return;
         }
-        $this->logTransport->dumpLogEvents();
-    }
-
-    public static function createSettingsStorage() {
-        if (LogHeroPluginSettings::isAsyncFlush()) {
-            return new FileStorage(LogHeroGlobals::Instance()->getSettingsStorageFilename());
-        }
-        return null;
+        $this->logTransport->flush();
     }
 
     private function createLogBuffer() {

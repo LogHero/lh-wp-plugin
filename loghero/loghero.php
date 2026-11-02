@@ -3,7 +3,7 @@
 Plugin Name:       LogHero Client
 Plugin URI:        https://wordpress.org/plugins/loghero/
 Description:       Analyze how search engines and other bots crawl and understand your web page. The official WordPress plugin for log-hero.com.
-Version:           0.3.0
+Version:           0.4.0
 Requires at least: 6.0
 Requires PHP:      7.4
 Author:            Kay Wolter
@@ -33,11 +33,9 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
 */
 
 namespace LogHero\Wordpress;
-use \LogHero\Client\APIKeyUndefinedException;
 use LogHero\Client\PermissionDeniedException;
 
 if (!defined('ABSPATH')) {
@@ -45,7 +43,7 @@ if (!defined('ABSPATH')) {
 }
 
 
-if (!class_exists( 'LogHeroClient_Plugin')) {
+if (!class_exists('\LogHero\Wordpress\LogHero_Plugin', false)) {
     require_once __DIR__ . '/autoload.php';
 
     class LogHero_Plugin {
@@ -53,19 +51,7 @@ if (!class_exists( 'LogHeroClient_Plugin')) {
         protected $logHeroClient;
 
         public function __construct() {
-            try {
-                $this->initialize();
-            }
-            catch (APIKeyUndefinedException $e) {
-                $apiKeyFromDb = get_option('api_key');
-                if ($apiKeyFromDb) {
-                    LogHeroGlobals::Instance()->refreshAPIKey($apiKeyFromDb);
-                    $this->initialize();
-                }
-                self::refreshPluginSettings();
-            }
-            catch (PermissionDeniedException $e) {
-            }
+            add_action('shutdown', array($this, 'onShutdown'));
         }
 
         public static function getInstance() {
@@ -75,24 +61,34 @@ if (!class_exists( 'LogHeroClient_Plugin')) {
             return self::$Instance;
         }
 
-        public static function refreshPluginSettings() {
-            $pluginSettings = new LogHeroPluginSettings(LogHeroPluginClient::createSettingsStorage());
-            $pluginSettings->flushToSettingsStorage();
-        }
-
-        protected function flushEndpoint() {
-            return LogHeroFlushEndpoint::url();
-        }
-
-        private function initialize() {
-            # No flush endpoint is passed here on purpose. Building it needs rest_url(),
-            # which cannot run this early, so the transport resolves it when it triggers.
-            $this->logHeroClient = new LogHeroPluginClient();
-            add_action('shutdown', array($this->logHeroClient, 'submitLogEvent'));
+        /**
+         * The client is created on shutdown rather than while plugins load, so
+         * WordPress is fully available (pluggable functions, upload directory).
+         */
+        public function onShutdown() {
+            # Only web requests are logged. WP-CLI runs have no request to log, and
+            # during installation the database is not ready.
+            if (PHP_SAPI === 'cli' || wp_installing()) {
+                return;
+            }
+            try {
+                if (!$this->logHeroClient) {
+                    $this->logHeroClient = new LogHeroPluginClient();
+                }
+                $this->logHeroClient->submitLogEvent();
+            }
+            catch (PermissionDeniedException $e) {
+            }
+            catch (\Exception $e) {
+            }
         }
     }
 
-    LogHeroFlushEndpoint::setup();
+    register_activation_hook(__FILE__, array('\LogHero\Wordpress\LogHeroUpgrade', 'activate'));
+    register_deactivation_hook(__FILE__, array('\LogHero\Wordpress\LogHeroUpgrade', 'deactivate'));
+
+    LogHeroCron::setup();
+    LogHeroUpgrade::setup();
     LogHero_Plugin::getInstance();
 
     if (is_admin()) {

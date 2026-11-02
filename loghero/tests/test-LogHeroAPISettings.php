@@ -6,13 +6,14 @@ use LogHero\Wordpress\LogHeroPluginSettings;
 
 class LogHeroAPISettingsTest extends \WP_UnitTestCase {
 
-    public function setUp() {
+    public function set_up() {
+        parent::set_up();
         update_option(LogHeroPluginSettings::$apiEndpointOptionName, null);
     }
 
     public function testProvideDefaultSettings() {
         $settings = new LogHeroAPISettings(new LogHeroPluginSettings());
-        static::assertEquals('https://api.loghero.io/logs/', $settings->getLogPackageEndpoint());
+        static::assertEquals('https://in.app.log-hero.com/logs', $settings->getLogPackageEndpoint());
     }
 
     public function testProvideCustomizedSettings() {

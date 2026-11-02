@@ -6,7 +6,7 @@ License URI: https://opensource.org/licenses/MIT
 Tags: seo, log files, crawlers, log analysis, bots
 Requires at least: 6.0
 Tested up to: 7.1
-Stable tag: 0.3.0
+Stable tag: 0.4.0
 Requires PHP: 7.4
 
 See which search engines, AI crawlers and other bots visit your site, and what they find. The official plugin for log-hero.com.
@@ -140,6 +140,15 @@ If you have any problems, write our support team.
 You'll find answers to many of your questions on [log-hero.com](https://log-hero.com) or write our support team.
 
 == Changelog ==
+
+= [0.4.0] =
+= Security =
+* Fixed: on web servers that ignore .htaccess files (nginx, some LiteSpeed and Apache setups), the plugin's logs folder was publicly readable. It contained settings.loghero.io.json with the LogHero API key and, if configured, the Redis URL, as well as the log buffer with request data of recent visitors. Please regenerate your LogHero API key after updating, and change your Redis password if you configured one.
+* The settings file is gone. Settings are read from the WordPress database only.
+* The REST route loghero/v1/flush is gone. Buffered log events are now sent at the end of the request after the response has been delivered (PHP-FPM, LiteSpeed), or by WP-Cron otherwise. A WP-Cron event every five minutes acts as a safety net.
+* The log buffer and error files moved to a folder with a random, unguessable name in the uploads directory. Define LOGHERO_STORAGE_DIR in wp-config.php (or use the loghero_storage_dir filter) to keep them outside the web root.
+* On update, the old logs folder and all files in it are deleted. Pending log events are moved to the new buffer first.
+* Error files store only the error message, no stack traces.
 
 = [0.3.0] =
 = Security =
