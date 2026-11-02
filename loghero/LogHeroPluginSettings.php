@@ -10,6 +10,13 @@ if (!defined('ABSPATH')) {
 
 
 
+/**
+ * Plugin settings, read from wp_options only.
+ *
+ * Up to 0.3.0 the settings, API key included, were also mirrored into
+ * logs/settings.loghero.io.json for the asynchronous flush. That file was
+ * publicly readable on servers that ignore .htaccess and has been removed.
+ */
 class LogHeroPluginSettings {
     public static $apiKeyOptionName = 'loghero_api_key';
     public static $redisUrlOptionName = 'loghero_redis_url';
@@ -19,20 +26,12 @@ class LogHeroPluginSettings {
     public static $disableTransportOptionName = 'loghero_disable_transport';
     public static $defaultRedisKeyPrefix = 'io.loghero:wp';
 
-    private $settingsStorage;
-    private $hasWordPress;
-
     private $apiKey;
     private $transportType;
     private $redisOptions;
     private $apiEndpoint;
 
-    public function __construct($settingsStorage = null, $hasWordPress = null) {
-        if ($hasWordPress === null) {
-            $hasWordPress = function_exists('get_option') ? True : False;
-        }
-        $this->hasWordPress = $hasWordPress;
-        $this->settingsStorage = $settingsStorage;
+    public function __construct() {
         $this->initializeSettings();
     }
 
@@ -42,7 +41,6 @@ class LogHeroPluginSettings {
 
     public function getTransportType() {
         return $this->transportType;
-
     }
 
     public function getRedisOptions() {
@@ -53,28 +51,9 @@ class LogHeroPluginSettings {
         return $this->apiEndpoint;
     }
 
-    public function flushToSettingsStorage() {
-        $optionsToStore = static::getOptionsToStore();
-        $jsonData = array();
-        foreach($optionsToStore as $option) {
-            $jsonData[$option] = get_option($option);
-        }
-        if ($this->settingsStorage) {
-            $this->settingsStorage->set(json_encode($jsonData));
-        }
-    }
-
-    public static function accessToLogsFolderIsRequired() {
+    public static function accessToStorageFolderIsRequired() {
         $settings = new self();
-        if ($settings->isAsyncFlushInternally()) {
-            return true;
-        }
         return $settings->getRedisOptions() === null;
-    }
-
-    public static function isAsyncFlush() {
-        $settings = new self();
-        return $settings->isAsyncFlushInternally();
     }
 
     public static function buildDefaultRedisKeyPrefix($apiKey) {
@@ -82,70 +61,38 @@ class LogHeroPluginSettings {
     }
 
     private function initializeSettings() {
-        $jsonData = null;
-        $storageData = $this->settingsStorage ? $this->settingsStorage->get() : null;
-        if ($storageData) {
-            $jsonData = json_decode($storageData, true);
-        }
-        $this->apiKey = $this->getOption(static::$apiKeyOptionName, $jsonData);
+        $this->apiKey = get_option(static::$apiKeyOptionName);
 
         # LOG-182
         if (!$this->apiKey) {
-            $this->apiKey = $this->getOption('api_key', $jsonData);
+            $this->apiKey = get_option('api_key');
         }
 
-        $apiEndpoint = $this->getOption(static::$apiEndpointOptionName, $jsonData);
+        $apiEndpoint = get_option(static::$apiEndpointOptionName);
         if ($apiEndpoint) {
             $this->apiEndpoint = $apiEndpoint;
         }
-        $redisUrl = $this->getOption(static::$redisUrlOptionName, $jsonData);
+        $redisUrl = get_option(static::$redisUrlOptionName);
         if($redisUrl) {
-            $redisKeyPrefix = $this->getOption(static::$redisKeyPrefixOptionName, $jsonData);
+            $redisKeyPrefix = get_option(static::$redisKeyPrefixOptionName);
             if (!$redisKeyPrefix) {
                 $redisKeyPrefix = static::buildDefaultRedisKeyPrefix($this->apiKey);
             }
             $this->redisOptions = new RedisOptions($redisUrl, $redisKeyPrefix);
         }
-        $this->initializeTransportType($jsonData);
+        $this->initializeTransportType();
     }
 
-    private function getOption($key, $jsonData) {
-        if ($this->hasWordPress) {
-            return get_option($key);
-        }
-        if ($jsonData) {
-            return array_key_exists($key, $jsonData) ? $jsonData[$key] : null;
-        }
-        return null;
-    }
-
-    private function isAsyncFlushInternally() {
-        return $this->getTransportType() === LogTransportType::ASYNC;
-    }
-
-    private function initializeTransportType($jsonData) {
-        $disableTransport = $this->getOption(static::$disableTransportOptionName, $jsonData);
-        if ($disableTransport) {
+    private function initializeTransportType() {
+        if (get_option(static::$disableTransportOptionName)) {
             $this->transportType = LogTransportType::DISABLED;
             return;
         }
-        $useSyncTransport = $this->getOption(static::$useSyncTransportOptionName, $jsonData);
-        if ($useSyncTransport) {
+        if (get_option(static::$useSyncTransportOptionName)) {
             $this->transportType = LogTransportType::SYNC;
             return;
         }
         $this->transportType = LogTransportType::ASYNC;
-    }
-
-    private static function getOptionsToStore() {
-        return array(
-            static::$useSyncTransportOptionName,
-            static::$disableTransportOptionName,
-            static::$apiKeyOptionName,
-            static::$redisUrlOptionName,
-            static::$redisKeyPrefixOptionName,
-            static::$apiEndpointOptionName
-        );
     }
 
 }

@@ -19,7 +19,6 @@ class LogHeroAdmin {
         add_action('admin_menu', '\LogHero\Wordpress\LogHeroAdmin::addLogHeroAdminPage');
         add_action('admin_init', '\LogHero\Wordpress\LogHeroAdmin::initAdmin');
         add_action('admin_notices', '\LogHero\Wordpress\LogHeroAdmin::setupAdminNotices');
-        static::flushSettingsToFiles();
     }
 
     public static function addLogHeroAdminPage() {
@@ -216,14 +215,12 @@ class LogHeroAdmin {
              </div>';
         }
         try {
-            $asyncFlushError = LogHeroGlobals::Instance()->errors()->getError('async-flush');
-            if ($asyncFlushError) {
+            $flushError = LogHeroGlobals::Instance()->errors()->getError('deferred-flush');
+            if ($flushError) {
                 echo '<div class="notice notice-warning is-dismissible">
-                 <p>LogHero asynchronous flush failed! This is most likely caused by your server configuration which might block requests made from your backend.
-                 The log events are currently flushed synchronously.
-                 To suppress this warning, either update your server configuration or go to the <a href="' . $settingsPageUrl . '">LogHero settings page</a> and activate the "' . esc_html(static::$useSyncTransportOptionLabel) . '" option.
-                 For more information visit <a target="_blank" href="https://log-hero.com/docs/asynchronous-flush-failed/">https://log-hero.com/docs/asynchronous-flush-failed/</a>.</p>
-                 <p>Error message: ' . esc_html($asyncFlushError) . '</p>
+                 <p>LogHero could not send buffered log events. They will be retried automatically every five minutes.
+                 If this warning persists, go to the <a href="' . $settingsPageUrl . '">LogHero settings page</a> and activate the "' . esc_html(static::$useSyncTransportOptionLabel) . '" option.</p>
+                 <p>Error message: ' . esc_html($flushError) . '</p>
              </div>';
             }
             $unexpectedError = LogHeroGlobals::Instance()->errors()->getError('unexpected');
@@ -236,25 +233,12 @@ class LogHeroAdmin {
             }
         }
         catch(PermissionDeniedException $permissionDeniedError) {
-            if (LogHeroPluginSettings::accessToLogsFolderIsRequired()) {
+            if (LogHeroPluginSettings::accessToStorageFolderIsRequired()) {
                 echo '<div class="notice notice-error is-dismissible">
-                 <p>Your LogHero plugin cannot write to the "logs" folder (permission denied). Please set access rights properly or use the Redis log buffer with synchronous flush.
-                 For more information visit <a target="_blank" href="https://log-hero.com/docs/permission-denied">https://log-hero.com/docs/permission-denied</a>.</p>
+                 <p>Your LogHero plugin cannot write to its storage folder (permission denied). Please make the uploads folder writable, define LOGHERO_STORAGE_DIR in wp-config.php to point to a writable folder outside the web root, or use the Redis log buffer.</p>
                  <p>Error message: ' . esc_html($permissionDeniedError->getMessage()) . '</p>
                 </div>';
             }
-        }
-    }
-
-    private static function flushSettingsToFiles() {
-        try {
-            LogHero_Plugin::refreshPluginSettings();
-            $useSyncTransport = get_option(LogHeroPluginSettings::$useSyncTransportOptionName);
-            if ($useSyncTransport) {
-                LogHeroGlobals::Instance()->errors()->resolveError('async-flush');
-            }
-        }
-        catch(PermissionDeniedException $e) {
         }
     }
 
