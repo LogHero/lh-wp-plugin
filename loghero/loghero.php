@@ -3,7 +3,7 @@
 Plugin Name:       LogHero Client
 Plugin URI:        https://wordpress.org/plugins/loghero/
 Description:       Analyze how search engines and other bots crawl and understand your web page. The official WordPress plugin for log-hero.com.
-Version:           0.4.0
+Version:           0.5.0
 Requires at least: 6.0
 Requires PHP:      7.4
 Author:            Kay Wolter
