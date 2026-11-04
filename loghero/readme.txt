@@ -90,7 +90,7 @@ The plugin registers a handler on the WordPress `shutdown` action. For **every**
 * The HTTP status code your site returned.
 * The User-Agent header sent by the client.
 * The Referer header sent by the client, if present.
-* The IP address of the client.
+* The IP address of the client, unhashed. Log Hero uses it to verify whether a request really comes from the bot it claims to be (published IP ranges of the bot operators and reverse DNS).
 * The timestamp of the request.
 * The time your site needed to generate the response, in milliseconds.
 * Only for requests that carry a Web Bot Auth signature (cryptographically signed requests from AI agents and crawlers, see RFC 9421): the Signature and Signature-Input headers and the values of the headers the signature covers, usually Signature-Agent. These headers are sent by automated clients, not by browsers of human visitors. Authorization and Cookie headers are never transmitted, even if a signature covers them.
@@ -145,6 +145,9 @@ You'll find answers to many of your questions on [log-hero.com](https://log-hero
 = [0.5.0] =
 = Added =
 * Web Bot Auth support. Requests that are signed according to the Web Bot Auth draft (HTTP Message Signatures, RFC 9421), for example by ChatGPT's agent, now forward their signature headers to Log Hero, so signed bots can be verified cryptographically instead of by user agent and IP address alone. The plugin itself does not verify anything and adds no work for unsigned requests.
+
+= Changed =
+* The client IP address is now also transmitted unhashed, so Log Hero can verify bots against the current IP ranges published by their operators and by reverse DNS. Earlier versions sent per-octet hashes, which are trivial to reverse and therefore were never an effective anonymization.
 
 = [0.4.0] =
 = Security =
@@ -202,7 +205,7 @@ You'll find answers to many of your questions on [log-hero.com](https://log-hero
 == Upgrade Notice ==
 
 = [0.5.0] =
-Adds Web Bot Auth support: signature headers of signed bot requests are forwarded to Log Hero for verification.
+Adds Web Bot Auth support and transmits the client IP unhashed for more reliable bot verification.
 
 = [0.3.0] =
 Important fix: earlier versions sent log events to an endpoint that no longer exists, so no data arrived. This release restores delivery. It also requires WordPress 6.0 and PHP 7.4 or newer and documents the data transmitted to the Log Hero service.
