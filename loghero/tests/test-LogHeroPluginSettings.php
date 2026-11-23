@@ -1,27 +1,19 @@
 <?php
 namespace LogHero\Wordpress\Test;
-use LogHero\Client\FileStorage;
 use \LogHero\Wordpress\LogHeroPluginSettings;
 use \LogHero\Client\LogTransportType;
 use \LogHero\Client\RedisOptions;
 
 
 class LogHeroPluginSettingsTest extends \WP_UnitTestCase {
-    private $settingsFilename = __DIR__ . '/logs/settings.loghero.io.json';
-
-    public function setUp() {
+    public function set_up() {
+        parent::set_up();
         update_option(LogHeroPluginSettings::$useSyncTransportOptionName, null);
         update_option(LogHeroPluginSettings::$disableTransportOptionName, null);
         update_option(LogHeroPluginSettings::$apiKeyOptionName, 'SOME_API_KEY');
         update_option(LogHeroPluginSettings::$redisUrlOptionName, null);
         update_option(LogHeroPluginSettings::$redisKeyPrefixOptionName, null);
         update_option(LogHeroPluginSettings::$apiEndpointOptionName, null);
-    }
-
-    public function tearDown() {
-        if(file_exists($this->settingsFilename)) {
-            unlink($this->settingsFilename);
-        }
     }
 
     public function testGetTransportTypeFromOptions() {
@@ -65,58 +57,22 @@ class LogHeroPluginSettingsTest extends \WP_UnitTestCase {
         static::assertEquals('https://my.api.endpoint/logs/', $this->createSettings()->getApiEndpoint());
     }
 
-    public function testFlushSettingsToStorage() {
+    public function testSettingsAreNeverWrittenToAFile() {
+        static::assertFalse(method_exists(LogHeroPluginSettings::class, 'flushToSettingsStorage'));
+        static::assertFileDoesNotExist(dirname(__DIR__) . '/logs/settings.loghero.io.json');
+    }
+
+    public function testSpecifyIfAccessToStorageFolderIsRequired() {
+        static::assertTrue(LogHeroPluginSettings::accessToStorageFolderIsRequired());
         update_option(LogHeroPluginSettings::$useSyncTransportOptionName, true);
+        static::assertTrue(LogHeroPluginSettings::accessToStorageFolderIsRequired());
         update_option(LogHeroPluginSettings::$redisUrlOptionName, 'REDIS_URL');
-        update_option(LogHeroPluginSettings::$redisKeyPrefixOptionName, 'REDIS_PREFIX');
-        $this->createSettings()->flushToSettingsStorage();
-        $json = file_get_contents($this->settingsFilename);
-        $jsonData = json_decode($json, true);
-        static::assertTrue($jsonData[LogHeroPluginSettings::$useSyncTransportOptionName]);
-        static::assertEquals('SOME_API_KEY', $jsonData[LogHeroPluginSettings::$apiKeyOptionName]);
-        static::assertEquals('REDIS_URL', $jsonData[LogHeroPluginSettings::$redisUrlOptionName]);
-        static::assertEquals('REDIS_PREFIX', $jsonData[LogHeroPluginSettings::$redisKeyPrefixOptionName]);
+        static::assertFalse(LogHeroPluginSettings::accessToStorageFolderIsRequired());
+        update_option(LogHeroPluginSettings::$redisUrlOptionName, '');
+        static::assertTrue(LogHeroPluginSettings::accessToStorageFolderIsRequired());
     }
 
-    public function testReadSettingsFromStorage() {
-        file_put_contents($this->settingsFilename, '{
-        "' . LogHeroPluginSettings::$useSyncTransportOptionName . '": true,
-        "' . LogHeroPluginSettings::$apiKeyOptionName . '": "API_KEY_FROM_STORAGE"
-        }');
-        $hasWordPress = false;
-        $settings = $this->createSettings($hasWordPress);
-        static::assertEquals(LogTransportType::SYNC, $settings->getTransportType());
-        static::assertEquals('API_KEY_FROM_STORAGE', $settings->getApiKey());
-    }
-
-    public function testIgnoreStorageIfNotProvided() {
-        $settingsWithoutStorage = new LogHeroPluginSettings();
-        static::assertEquals('SOME_API_KEY', $settingsWithoutStorage->getApiKey());
-        $settingsWithoutStorage->flushToSettingsStorage();
-        $settingsWithoutStorageAndWordPress = new LogHeroPluginSettings(null, False);
-        static::assertNull($settingsWithoutStorageAndWordPress->getApiKey());
-    }
-
-    public function testSpecifyIfAsyncFlushIsActivated() {
-        static::assertTrue(LogHeroPluginSettings::isAsyncFlush());
-        update_option(LogHeroPluginSettings::$useSyncTransportOptionName, true);
-        static::assertFalse(LogHeroPluginSettings::isAsyncFlush());
-        update_option(LogHeroPluginSettings::$useSyncTransportOptionName, false);
-        update_option(LogHeroPluginSettings::$disableTransportOptionName, true);
-        static::assertFalse(LogHeroPluginSettings::isAsyncFlush());
-    }
-
-    public function testSpecifyIfAccessToLogsFolderIsRequired() {
-        static::assertTrue(LogHeroPluginSettings::accessToLogsFolderIsRequired());
-        update_option(LogHeroPluginSettings::$useSyncTransportOptionName, true);
-        static::assertTrue(LogHeroPluginSettings::accessToLogsFolderIsRequired());
-        update_option(LogHeroPluginSettings::$redisUrlOptionName, 'REDIS_URL');
-        static::assertFalse(LogHeroPluginSettings::accessToLogsFolderIsRequired());
-        update_option(LogHeroPluginSettings::$useSyncTransportOptionName, false);
-        static::assertTrue(LogHeroPluginSettings::accessToLogsFolderIsRequired());
-    }
-
-    private function createSettings($hasWordPress = null) {
-        return new LogHeroPluginSettings(new FileStorage($this->settingsFilename), $hasWordPress);
+    private function createSettings() {
+        return new LogHeroPluginSettings();
     }
 }

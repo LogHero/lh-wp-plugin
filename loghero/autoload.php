@@ -12,15 +12,14 @@ spl_autoload_register(
         static $classes = null;
         if ($classes === null) {
             $classes = array(
-                'loghero\\wordpress\\invalidtokenexception' => '/InvalidTokenException.php',
-                'loghero\\wordpress\\invalidtransporttypeexception' => '/InvalidTransportTypeException.php',
                 'loghero\\wordpress\\loghero_plugin' => '/loghero.php',
                 'loghero\\wordpress\\logheropluginclient' => '/LogHeroPluginClient.php',
                 'loghero\\wordpress\\logheroglobals' => '/LogHeroGlobals.php',
                 'loghero\\wordpress\\logheroapisettings' => '/LogHeroAPISettings.php',
                 'loghero\\wordpress\\logheropluginsettings' => '/LogHeroPluginSettings.php',
-                'loghero\\wordpress\\logheroflushendpoint' => '/LogHeroFlushEndpoint.php',
-                'loghero\\wordpress\\wordpressasynclogtransport' => '/WordPressAsyncLogTransport.php'
+                'loghero\\wordpress\\wordpressdeferredlogtransport' => '/WordPressDeferredLogTransport.php',
+                'loghero\\wordpress\\logherocron' => '/LogHeroCron.php',
+                'loghero\\wordpress\\logheroupgrade' => '/LogHeroUpgrade.php'
             );
         }
         $cn = strtolower($class);
