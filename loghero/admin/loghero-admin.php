@@ -115,6 +115,22 @@ class LogHeroAdmin {
             static::$settingsGroup,
             $settingsSection
         );
+        static::addFieldToSection(
+            LogHeroPluginSettings::$proxyHeaderOptionName,
+            'Visitor IP Header',
+            '\LogHero\Wordpress\LogHeroAdmin::proxyHeaderInputRenderer',
+            static::$settingsGroup,
+            $settingsSection,
+            '\LogHero\Wordpress\LogHeroAdmin::sanitizeHeaderNameOption'
+        );
+        static::addFieldToSection(
+            LogHeroPluginSettings::$trustedProxiesOptionName,
+            'Trusted Proxies',
+            '\LogHero\Wordpress\LogHeroAdmin::trustedProxiesInputRenderer',
+            static::$settingsGroup,
+            $settingsSection,
+            '\LogHero\Wordpress\LogHeroAdmin::sanitizeTrustedProxiesOption'
+        );
     }
 
     public static function addFieldToSection($fieldName, $fieldLabel, $inputRenderer, $settingsGroup, $settingsSection, $sanitizeCallback = '\LogHero\Wordpress\LogHeroAdmin::sanitizeTextOption') {
@@ -135,6 +151,18 @@ class LogHeroAdmin {
             return '';
         }
         return sanitize_text_field($value);
+    }
+
+    public static function sanitizeHeaderNameOption($value) {
+        if (!is_string($value)) {
+            return '';
+        }
+        $value = trim($value);
+        return preg_match('/^[A-Za-z0-9_-]{1,100}$/', $value) ? $value : '';
+    }
+
+    public static function sanitizeTrustedProxiesOption($value) {
+        return implode("\n", LogHeroPluginSettings::parseTrustedProxies($value));
     }
 
     public static function sanitizeCheckboxOption($value) {
@@ -173,6 +201,39 @@ class LogHeroAdmin {
             value="<?php echo esc_attr(get_option(LogHeroPluginSettings::$redisKeyPrefixOptionName)); ?>"
         />
         <p class="description">Redis key used to store buffered log events (default: "<?php echo esc_html(LogHeroPluginSettings::buildDefaultRedisKeyPrefix(get_option(LogHeroPluginSettings::$apiKeyOptionName))); ?>").</p>
+        <?php
+    }
+
+    public static function proxyHeaderInputRenderer() {
+        ?>
+        <input
+            type="text"
+            name="<?php echo esc_attr(LogHeroPluginSettings::$proxyHeaderOptionName) ?>"
+            id="<?php echo esc_attr(LogHeroPluginSettings::$proxyHeaderOptionName) ?>"
+            value="<?php echo esc_attr(get_option(LogHeroPluginSettings::$proxyHeaderOptionName)); ?>"
+            placeholder="X-Forwarded-For"
+        />
+        <p class="description">
+            Leave empty in most cases. LogHero detects Cloudflare, Google Cloud load balancers and proxies on private networks automatically.
+            Set this only if your site is behind another proxy or CDN, to the header that carries the visitor's IP address (for example X-Forwarded-For or True-Client-IP).
+            Without trusted proxies below, the header is trusted for every request, so only use it if your server can't be reached directly, bypassing the proxy.
+        </p>
+        <?php
+    }
+
+    public static function trustedProxiesInputRenderer() {
+        ?>
+        <textarea
+            name="<?php echo esc_attr(LogHeroPluginSettings::$trustedProxiesOptionName) ?>"
+            id="<?php echo esc_attr(LogHeroPluginSettings::$trustedProxiesOptionName) ?>"
+            rows="3"
+            cols="40"
+            class="code"
+            placeholder="203.0.113.0/24"
+        ><?php echo esc_textarea(get_option(LogHeroPluginSettings::$trustedProxiesOptionName)); ?></textarea>
+        <p class="description">
+            IP addresses or CIDR ranges of your proxies, one per line. Forwarding headers are only read for requests that come from these addresses (or from the automatically detected ones).
+        </p>
         <?php
     }
 

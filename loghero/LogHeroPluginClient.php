@@ -3,6 +3,7 @@
 namespace LogHero\Wordpress;
 use LogHero\Client\APIAccess;
 use LogHero\Client\LogEventFactory;
+use LogHero\Client\ClientIpResolver;
 use LogHero\Client\FileLogBuffer;
 use LogHero\Client\PermissionDeniedException;
 use LogHero\Client\RedisLogBuffer;
@@ -30,7 +31,10 @@ class LogHeroPluginClient {
         if (!$apiAccess) {
             $apiAccess = new APIAccess($clientId, $this->apiSettings);
         }
-        $this->logEventFactory = new LogEventFactory();
+        $this->logEventFactory = new LogEventFactory(new ClientIpResolver(
+            $this->settings->getProxyHeader(),
+            $this->settings->getTrustedProxies()
+        ));
         $logTransportType = $this->settings->getTransportType();
         if ($logTransportType === LogTransportType::DISABLED) {
             $this->logTransport = new DisabledLogTransport(

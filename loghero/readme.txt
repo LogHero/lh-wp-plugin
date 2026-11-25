@@ -142,6 +142,13 @@ You'll find answers to many of your questions on [log-hero.com](https://log-hero
 
 == Changelog ==
 
+= [Unreleased] =
+= Fixed =
+* Sites behind a load balancer, CDN or reverse proxy reported the proxy's IP address instead of the visitor's, so Log Hero could not verify Googlebot, Bingbot and other bots against their IP ranges. The plugin now detects Cloudflare (CF-Connecting-IP), Google Cloud load balancers (X-Forwarded-For) and proxies on private networks (X-Forwarded-For, X-Real-IP) and takes the visitor IP from their headers. Forwarding headers are only read when the request actually comes from such a proxy, so they can't be used to fake a bot's IP address.
+
+= Added =
+* "Visitor IP Header" and "Trusted Proxies" settings for proxy setups the plugin can't detect automatically.
+
 = [0.5.0] =
 = Added =
 * Web Bot Auth support. Requests that are signed according to the Web Bot Auth draft (HTTP Message Signatures, RFC 9421), for example by ChatGPT's agent, now forward their signature headers to Log Hero, so signed bots can be verified cryptographically instead of by user agent and IP address alone. The plugin itself does not verify anything and adds no work for unsigned requests.
