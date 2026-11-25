@@ -20,7 +20,7 @@ if (!defined('ABSPATH')) {
  */
 class LogHeroUpgrade {
     public static $versionOptionName = 'loghero_plugin_version';
-    public static $currentVersion = '0.5.0';
+    public static $currentVersion = '0.6.0';
 
     public static function setup() {
         add_action('init', array(static::class, 'maybeUpgrade'), 1);

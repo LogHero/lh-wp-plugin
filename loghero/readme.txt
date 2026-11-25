@@ -6,7 +6,7 @@ License URI: https://opensource.org/licenses/MIT
 Tags: seo, log files, crawlers, log analysis, bots
 Requires at least: 6.0
 Tested up to: 7.1
-Stable tag: 0.5.0
+Stable tag: 0.6.0
 Requires PHP: 7.4
 
 See which search engines, AI crawlers and other bots visit your site, and what they find. The official plugin for log-hero.com.
@@ -142,7 +142,7 @@ You'll find answers to many of your questions on [log-hero.com](https://log-hero
 
 == Changelog ==
 
-= [Unreleased] =
+= [0.6.0] =
 = Fixed =
 * Sites behind a load balancer, CDN or reverse proxy reported the proxy's IP address instead of the visitor's, so Log Hero could not verify Googlebot, Bingbot and other bots against their IP ranges. The plugin now detects Cloudflare (CF-Connecting-IP), Google Cloud load balancers (X-Forwarded-For) and proxies on private networks (X-Forwarded-For, X-Real-IP) and takes the visitor IP from their headers. Forwarding headers are only read when the request actually comes from such a proxy, so they can't be used to fake a bot's IP address.
 
@@ -210,6 +210,9 @@ You'll find answers to many of your questions on [log-hero.com](https://log-hero
 * Option to switch from asynchronous mode to synchronous mode
 
 == Upgrade Notice ==
+
+= [0.6.0] =
+Fixes bot verification for sites behind Cloudflare, Google Cloud load balancers and other reverse proxies, which reported the proxy's IP address instead of the visitor's.
 
 = [0.5.0] =
 Adds Web Bot Auth support and transmits the client IP unhashed for more reliable bot verification.

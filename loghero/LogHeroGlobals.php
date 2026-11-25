@@ -29,7 +29,7 @@ class LogHeroGlobals {
     }
 
     public function getClientId() {
-        return 'WordPress Plugin loghero/wp@0.5.0';
+        return 'WordPress Plugin loghero/wp@0.6.0';
     }
 
     /**
