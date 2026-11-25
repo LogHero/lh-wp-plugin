@@ -14,6 +14,17 @@ class LogHeroPluginSettingsTest extends \WP_UnitTestCase {
         update_option(LogHeroPluginSettings::$redisUrlOptionName, null);
         update_option(LogHeroPluginSettings::$redisKeyPrefixOptionName, null);
         update_option(LogHeroPluginSettings::$apiEndpointOptionName, null);
+        update_option(LogHeroPluginSettings::$proxyHeaderOptionName, null);
+        update_option(LogHeroPluginSettings::$trustedProxiesOptionName, null);
+    }
+
+    public function testGetProxyOptions() {
+        static::assertNull($this->createSettings()->getProxyHeader());
+        static::assertEquals(array(), $this->createSettings()->getTrustedProxies());
+        update_option(LogHeroPluginSettings::$proxyHeaderOptionName, 'X-Forwarded-For');
+        update_option(LogHeroPluginSettings::$trustedProxiesOptionName, "203.0.113.0/24\n 2001:db8::1, garbage\n203.0.113.0/24");
+        static::assertEquals('X-Forwarded-For', $this->createSettings()->getProxyHeader());
+        static::assertEquals(array('203.0.113.0/24', '2001:db8::1'), $this->createSettings()->getTrustedProxies());
     }
 
     public function testGetTransportTypeFromOptions() {
